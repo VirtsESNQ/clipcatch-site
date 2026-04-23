@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ClipCatch — For traders.</title>
+<meta name="viewport" content="width=1440"/>
+<link rel="stylesheet" href="app/tokens.css"/>
+<link rel="icon" href="app/logo.png"/>
+<style>
+  html, body { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1400px 900px at 80% -10%, oklch(0.26 0.04 260) 0%, transparent 60%),
+      radial-gradient(1200px 900px at -10% 60%, oklch(0.22 0.08 255) 0%, transparent 55%),
+      oklch(0.085 0.008 260);
+  }
+  .site { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+
+  /* Nav (shared vocabulary with main) */
+  .nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(20px) saturate(160%); background: oklch(0.09 0.008 260 / 0.85); border-bottom: 0.5px solid var(--line); }
+  .nav-inner { max-width: 1280px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; gap: 32px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--fg); letter-spacing: -0.01em; text-decoration: none; }
+  .brand-mark { width: 32px; height: 32px; background: url('app/logo.png') center / contain no-repeat; filter: drop-shadow(0 4px 10px oklch(0.55 0.22 255 / 0.45)); }
+  .brand-mark.sm { width: 22px; height: 22px; }
+  .nav-links { display: flex; gap: 24px; margin-left: 16px; }
+  .nav-links a { color: var(--fg-mute); text-decoration: none; font-size: 13px; font-weight: 500; }
+  .nav-links a.on { color: var(--fg); }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-cta { margin-left: auto; }
+
+  /* Hero */
+  .hero { padding: 72px 0 40px; }
+  .hero-inner { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 64px; align-items: center; }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--rec); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--rec); }
+  h1 {
+    margin: 14px 0 20px; font-size: 72px; font-weight: 600;
+    letter-spacing: -0.035em; line-height: 0.98; color: var(--fg);
+    text-wrap: balance;
+  }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(180deg, oklch(0.82 0.16 255), oklch(0.52 0.22 260));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { font-size: 18px; line-height: 1.55; color: var(--fg-mute); max-width: 540px; text-wrap: pretty; }
+
+  /* Hero side card: daily log */
+  .daylog {
+    background: oklch(0.11 0.008 260); border-radius: 16px;
+    padding: 24px;
+    box-shadow: inset 0 0 0 0.5px var(--line), 0 30px 80px -20px rgba(0,0,0,0.5);
+  }
+  .daylog .head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .daylog .head .pip { width:8px; height:8px; border-radius:50%; background: var(--rec); box-shadow: 0 0 8px var(--rec-glow); animation: pip 1.6s ease-in-out infinite; }
+  @keyframes pip { 0%,100% { opacity: 1} 50% { opacity: 0.35} }
+  .daylog .head .t { color: var(--fg); font-size: 13.5px; font-weight: 600; }
+  .daylog .head .sub { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; margin-left: auto; }
+  .log-row {
+    display: grid; grid-template-columns: 64px 1fr auto;
+    gap: 12px; padding: 10px 0;
+    align-items: center;
+    border-bottom: 0.5px solid var(--line-soft);
+    font-size: 13px;
+  }
+  .log-row:last-child { border-bottom: 0; }
+  .log-row .time { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; }
+  .log-row .label { color: var(--fg); }
+  .log-row .label b { color: var(--fg); font-weight: 600; }
+  .log-row .tag {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    background: var(--bg-inset); color: var(--fg-mute);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .log-row .tag.win { background: var(--match-soft); color: var(--match); box-shadow: inset 0 0 0 0.5px oklch(0.74 0.15 155 / 0.4); }
+  .log-row .tag.loss { background: oklch(0.65 0.22 25 / 0.18); color: oklch(0.78 0.20 25); box-shadow: inset 0 0 0 0.5px oklch(0.65 0.22 25 / 0.4); }
+  .log-row .tag.live { background: var(--rec-soft); color: var(--rec); box-shadow: inset 0 0 0 0.5px var(--rec-glow); }
+  .daylog .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 0.5px solid var(--line); }
+  .daylog .s { display: flex; flex-direction: column; gap: 2px; }
+  .daylog .s b { color: var(--fg); font-size: 18px; font-weight: 600; font-family: var(--mono); }
+  .daylog .s span { color: var(--fg-faint); font-size: 11px; }
+
+  /* Sections */
+  section.sec { padding: 96px 0; }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; max-width: 720px; }
+  .sec-head.center { margin: 0 auto 48px; text-align: center; align-items: center; }
+  .sec-head h2 { margin: 0; font-size: 48px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.04; color: var(--fg); text-wrap: balance; }
+  .sec-head p { margin: 0; color: var(--fg-mute); font-size: 16.5px; line-height: 1.55; max-width: 640px; text-wrap: pretty; }
+
+  /* Broker-specific playbooks */
+  .playbooks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .pb {
+    background: var(--bg-card); border-radius: 14px; padding: 22px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px;
+    position: relative; transition: box-shadow .2s, transform .2s;
+  }
+  .pb:hover { box-shadow: inset 0 0 0 0.5px oklch(0.68 0.18 255 / 0.4); transform: translateY(-1px); }
+  .pb .glyph {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--bg-inset); color: var(--fg);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    font-weight: 700; font-size: 16px; font-family: var(--mono);
+  }
+  .pb h5 { margin: 0 0 6px; color: var(--fg); font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .pb .platform { color: var(--fg-faint); font-size: 11px; font-family: var(--mono); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; }
+  .pb p { margin: 0 0 12px; color: var(--fg-mute); font-size: 13.5px; line-height: 1.55; }
+  .pb ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .pb ul li { color: var(--fg-mute); font-size: 12.5px; display: grid; grid-template-columns: 14px 1fr; gap: 8px; line-height: 1.5; }
+  .pb ul li svg { color: var(--match); margin-top: 3px; }
+
+  /* Killer-feature split cards */
+  .split-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .sf {
+    background: var(--bg-card); border-radius: 16px; padding: 28px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    display: flex; flex-direction: column; gap: 16px;
+    position: relative; overflow: hidden;
+  }
+  .sf h4 { margin: 0; color: var(--fg); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .sf p { margin: 0; color: var(--fg-mute); font-size: 14.5px; line-height: 1.55; }
+  .sf .vis {
+    min-height: 180px; border-radius: 10px; padding: 20px;
+    background: oklch(0.10 0.008 260);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    position: relative; overflow: hidden;
+  }
+
+  /* Area-monitor demo tiles */
+  .areacard {
+    position: absolute; border: 1.5px solid var(--match);
+    background: oklch(0.74 0.15 155 / 0.06); border-radius: 4px;
+    top: 20%; right: 18%; width: 30%; bottom: 20%;
+  }
+  .areacard .tag { position: absolute; top: -22px; right: 0; font-family: var(--mono); font-size: 9.5px; font-weight: 700; color: var(--match); padding: 2px 6px; border-radius: 3px; background: oklch(0.09 0.008 260 / 0.92); box-shadow: inset 0 0 0 0.5px oklch(0.74 0.15 155 / 0.4); }
+
+  /* Detail spec table */
+  .spec {
+    background: var(--bg-card); border-radius: 14px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    overflow: hidden;
+  }
+  .spec-row { display: grid; grid-template-columns: 180px 1fr 1fr; padding: 18px 22px; border-bottom: 0.5px solid var(--line-soft); align-items: center; gap: 20px; }
+  .spec-row:last-child { border-bottom: 0; }
+  .spec-row .k { color: var(--fg-mute); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+  .spec-row .v { color: var(--fg); font-size: 14px; }
+  .spec-row .v small { color: var(--fg-faint); font-size: 12px; margin-left: 6px; }
+  .spec-row .mono { font-family: var(--mono); }
+
+  /* Roadmap timeline */
+  .roadmap {
+    background: oklch(0.10 0.008 260); border-radius: 16px;
+    padding: 40px 48px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    position: relative;
+  }
+  .roadmap::before {
+    content: ''; position: absolute; left: 48px; right: 48px; top: 80px;
+    height: 2px; background: linear-gradient(90deg, var(--match), var(--rec), var(--fg-dim));
+    opacity: 0.35;
+  }
+  .road-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; position: relative; }
+  .road {
+    display: flex; flex-direction: column; gap: 10px; position: relative;
+  }
+  .road .node {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: oklch(0.11 0.008 260);
+    box-shadow: 0 0 0 2px var(--match);
+    margin-bottom: 12px;
+  }
+  .road.progress .node { box-shadow: 0 0 0 2px var(--rec); background: var(--rec); animation: pip 1.6s ease-in-out infinite; }
+  .road.soon .node     { box-shadow: 0 0 0 2px var(--fg-dim); background: oklch(0.11 0.008 260); }
+  .road .q { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .road h6 { margin: 2px 0; color: var(--fg); font-size: 14px; font-weight: 600; }
+  .road p { margin: 0; color: var(--fg-mute); font-size: 12.5px; line-height: 1.55; }
+  .road .status {
+    font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+    padding: 2px 7px; border-radius: 4px; align-self: flex-start;
+  }
+  .road.done .status     { background: var(--match-soft); color: var(--match); }
+  .road.progress .status { background: var(--rec-soft); color: var(--rec); }
+  .road.soon .status     { background: var(--bg-inset); color: var(--fg-faint); }
+
+  /* FAQ */
+  .faq { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .faq-item { background: var(--bg-card); border-radius: 10px; padding: 22px 24px; box-shadow: inset 0 0 0 0.5px var(--line); }
+  .faq-item h6 { margin: 0 0 8px; color: var(--fg); font-size: 14px; font-weight: 600; }
+  .faq-item p  { margin: 0; color: var(--fg-mute); font-size: 13px; line-height: 1.6; }
+
+  /* CTA */
+  .footer-cta { position: relative; padding: 96px 48px; border-radius: 24px; background: radial-gradient(700px 400px at 50% 30%, oklch(0.55 0.22 255 / 0.22), transparent 60%), linear-gradient(180deg, oklch(0.22 0.02 260), oklch(0.14 0.012 260)); box-shadow: inset 0 0 0 0.5px var(--line); text-align: center; }
+  .footer-cta h2 { font-size: 56px; margin: 0 auto 16px; max-width: 720px; color: var(--fg); letter-spacing: -0.03em; font-weight: 600; text-wrap: balance; }
+  .footer-cta p { margin: 0 auto 28px; max-width: 520px; color: var(--fg-mute); font-size: 16px; }
+  .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-xl { height: 52px; padding: 0 22px; border-radius: 12px; font-size: 14.5px; }
+
+  footer { padding: 48px 0 32px; border-top: 0.5px solid var(--line); margin-top: 64px; }
+  .foot-inner { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; color: var(--fg-faint); font-size: 12px; }
+  .foot-inner a { color: var(--fg-mute); text-decoration: none; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* "Spec" tag row */
+  .workflow-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-top: 24px;
+  }
+  .ws {
+    background: oklch(0.11 0.008 260); border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .ws .t { color: var(--fg-faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .ws .v { color: var(--fg); font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+
+  /* Monitor zone demo */
+  .zone-demo {
+    position: relative; height: 100%;
+    background:
+      linear-gradient(to bottom, oklch(0.14 0.008 260), oklch(0.11 0.008 260));
+    border-radius: 6px;
+  }
+  .zone-demo .chart-strip { position: absolute; inset: 20px 20px 40px; display: flex; align-items: flex-end; gap: 3px; }
+  .zone-demo .chart-strip .cx {
+    flex: 1; background: var(--bg-inset);
+    border-radius: 1px;
+  }
+  .zone-demo .chart-strip .cx.up { background: oklch(0.55 0.15 155); }
+  .zone-demo .chart-strip .cx.dn { background: oklch(0.55 0.18 25); }
+  .zone-demo .axis {
+    position: absolute; right: 0; top: 0; bottom: 40px; width: 44px;
+    border-left: 0.5px solid var(--line-soft);
+    font-family: var(--mono); font-size: 9px;
+    color: var(--fg-faint); padding: 6px;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+  }
+
+  /* Trigger demo */
+  .trigger-demo {
+    display: flex; flex-direction: column; gap: 10px; height: 100%;
+    justify-content: center;
+  }
+  .trigger-demo .step { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; background: oklch(0.14 0.008 260); box-shadow: inset 0 0 0 0.5px var(--line); font-size: 12.5px; color: var(--fg-mute); }
+  .trigger-demo .step .num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-inset); color: var(--fg-faint); display: grid; place-items: center; font-family: var(--mono); font-size: 10px; font-weight: 700; }
+  .trigger-demo .step.live { background: var(--rec-soft); color: var(--fg); box-shadow: inset 0 0 0 0.5px var(--rec-glow); }
+  .trigger-demo .step.live .num { background: var(--rec); color: #fff; }
+  .trigger-demo .step .t { color: var(--fg-faint); font-family: var(--mono); font-size: 10px; }
+
+  /* Keyboard cluster */
+  kbd { font-family: var(--mono); font-size: 11px; padding: 2px 6px; border-radius: 4px; background: var(--bg-inset); box-shadow: inset 0 0 0 0.5px var(--line); color: var(--fg); }
+</style>
+</head>
+<body data-theme="dark">
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="ClipCatch Website.html" class="brand"><span class="brand-mark"></span>ClipCatch</a>
+    <div class="nav-links">
+      <a href="ClipCatch Website.html#how">How it works</a>
+      <a href="ClipCatch Website.html#compat">Works with</a>
+      <a href="ClipCatch Website.html#usecases">Use cases</a>
+      <a href="#" class="on">For traders</a>
+      <a href="ClipCatch Website.html#pricing">Pricing</a>
+    </div>
+    <div class="nav-cta">
+      <a href="ClipCatch Website.html#pricing" style="text-decoration:none;">
+        <button class="btn-rec" style="height:34px; padding:0 16px; font-size:13px; border-radius:8px;">
+          <span class="pulse"><span class="circ"></span></span>
+          Download free
+        </button>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="site">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="reveal">
+      <span class="eyebrow">For traders</span>
+      <h1>Your chart, <em>caught</em>. Every time.</h1>
+      <p class="sub">
+        A 60-second rolling buffer that doesn't care which platform you're on.
+        Save the exact bar. Tag the session. Review at the close. That's it — that's the app.
+      </p>
+      <div class="workflow-strip">
+        <div class="ws"><div class="t">Buffer</div><div class="v">60s rolling</div></div>
+        <div class="ws"><div class="t">Auto-save</div><div class="v">Area monitor</div></div>
+        <div class="ws"><div class="t">Export</div><div class="v">MP4 · ProRes</div></div>
+        <div class="ws"><div class="t">Footprint</div><div class="v">&lt; 3% CPU</div></div>
+      </div>
+    </div>
+
+    <div class="daylog reveal">
+      <div class="head">
+        <span class="pip"></span>
+        <span class="t">Today · trade log</span>
+        <span class="sub">Tue Apr 21</span>
+      </div>
+      <div class="log-row">
+        <span class="time">09:31.04</span>
+        <span class="label"><b>ES</b> failed breakdown · 5m</span>
+        <span class="tag win">+ 2R</span>
+      </div>
+      <div class="log-row">
+        <span class="time">10:04.22</span>
+        <span class="label"><b>NQ</b> double-top reject · 1m</span>
+        <span class="tag win">+ 1.2R</span>
+      </div>
+      <div class="log-row">
+        <span class="time">10:42.18</span>
+        <span class="label"><b>ES</b> VWAP bounce</span>
+        <span class="tag live">● LIVE</span>
+      </div>
+      <div class="log-row">
+        <span class="time">11:17.40</span>
+        <span class="label"><b>QQQ</b> liq sweep · 1m</span>
+        <span class="tag loss">− 0.4R</span>
+      </div>
+      <div class="log-row">
+        <span class="time">13:58.12</span>
+        <span class="label"><b>GC</b> breakout retest · 5m</span>
+        <span class="tag win">+ 3R</span>
+      </div>
+      <div class="stats">
+        <div class="s"><b>5</b><span>Clips today</span></div>
+        <div class="s"><b>+5.8R</b><span>Session</span></div>
+        <div class="s"><b>2m 14s</b><span>Footage</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Platform-specific playbooks -->
+<section class="sec" id="platforms">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Platform playbooks</span>
+    <h2>Exactly how to set it up next to your chart.</h2>
+    <p>Drop the area monitor over the bar you care about, pin the HUD where it won't get in the way, let it ride. Here's the setup our beta testers use on each platform.</p>
+  </div>
+
+  <div class="playbooks reveal">
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.70 0.18 230);">◆</div>
+      <div>
+        <h5>TradingView</h5>
+        <div class="platform">Web · macOS · Windows</div>
+        <p>Pop out the chart, set ClipCatch to "Region" and drag over the latest candle column. Area monitor triggers on any wick outside the range.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Works with pop-out windows</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Ignores the replay scrubber</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Saves with symbol in filename</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.75 0.18 40);">N</div>
+      <div>
+        <h5>NinjaTrader 8</h5>
+        <div class="platform">Windows · prop firms</div>
+        <p>Multi-chart workspace? Pick "Window", point it at NT's chart window, ClipCatch follows it around the desktop. Works across four monitors.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Multi-monitor aware</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Survives workspace save/load</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>DOM + chart in one clip</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.72 0.15 160);">S</div>
+      <div>
+        <h5>Sierra Chart</h5>
+        <div class="platform">Windows · order flow</div>
+        <p>Works beautifully with Footprint, Numbers Bars, and DOM. Area monitor arms on your delta imbalance study column.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Footprint-friendly</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Handles 4K tick-by-tick</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Low-latency recording</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.68 0.20 255);">T</div>
+      <div>
+        <h5>Tradovate</h5>
+        <div class="platform">Web · desktop · mobile companion</div>
+        <p>Browser version runs inside Arc or Chrome — ClipCatch captures the tab regardless of DPI scaling. One click, one clip.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Browser-tab capture</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Topstep · Apex workspaces</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Flash-fill dispute-ready</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.78 0.16 80);">Q</div>
+      <div>
+        <h5>Quantower</h5>
+        <div class="platform">Windows · macOS</div>
+        <p>Native macOS build? ClipCatch loves it. Record the chart + orderbook panels side-by-side with no stutter.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Native on both OS</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>OrderBook + chart combo</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Low-power capture mode</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.70 0.18 300);">M</div>
+      <div>
+        <h5>MotiveWave</h5>
+        <div class="platform">Desktop · Elliott Wave</div>
+        <p>For the wave counters. Record your count update live — or let the area monitor catch when price invalidates a pivot.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Annotation-friendly</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Pivot-invalidation trigger</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Works with Gann fans &amp; tools</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.62 0.20 25);">J</div>
+      <div>
+        <h5>Jigsaw Trading</h5>
+        <div class="platform">Order-flow DOM</div>
+        <p>The ladder is the whole game. Point the area monitor at the ladder, catch every print that moves more than a tick in your queue.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Queue-change trigger</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Ladder-only narrow window</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Size-in-queue analysis</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.66 0.18 150);">P</div>
+      <div>
+        <h5>ProjectX</h5>
+        <div class="platform">Prop · funded accounts</div>
+        <p>Your eval company will ask for video. "Prove you didn't manual-close that trade." Boom — here's the clip.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Evaluator-ready MP4</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Timestamp overlay option</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Topstep, Apex, TakeProfit</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.72 0.14 210);">W</div>
+      <div>
+        <h5>WealthChart</h5>
+        <div class="platform">Desktop</div>
+        <p>Custom indicators everywhere. Capture the signal the second your script prints it — area monitor on the signal column only.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Narrow-column monitor</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Works with dark-mode scripts</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>No conflict with hotkeys</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pb">
+      <div class="glyph" style="color: oklch(0.68 0.17 280);">TS</div>
+      <div>
+        <h5>TradeStation</h5>
+        <div class="platform">Windows · web</div>
+        <p>RadarScreen + Matrix + chart = three ClipCatch windows, zero CPU pain. Cover your whole trading desk.</p>
+        <ul>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Multiple region captures</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>Sync clips by timestamp</li>
+          <li><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2 2 4-4"/></svg>RadarScreen-wide capture</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Deep-dive features -->
+<section class="sec" id="monitor">
+  <div class="sec-head reveal">
+    <span class="eyebrow">What makes it different</span>
+    <h2>Two features that matter for tape.</h2>
+  </div>
+
+  <div class="split-features reveal">
+    <div class="sf">
+      <span class="eyebrow">Area monitor</span>
+      <h4>A watchdog pointed at your newest bar.</h4>
+      <p>Drag a rectangle around the latest candle. When the pixels inside change more than your threshold, ClipCatch auto-saves the 60 seconds leading up to it. No manual saves, no missed moves.</p>
+      <div class="vis">
+        <div class="zone-demo">
+          <div class="chart-strip" id="zoneStrip"></div>
+          <div class="axis"><span>5260</span><span>5250</span><span>5240</span><span>5230</span></div>
+          <div class="areacard">
+            <span class="tag">● MONITORING · LATEST BAR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sf">
+      <span class="eyebrow">Save-before</span>
+      <h4>The clip of what you just watched.</h4>
+      <p>You press the button <b>after</b> the move. ClipCatch rewinds into RAM, writes the previous 60 seconds to disk, and keeps recording. Save 30 clips in a session without thinking.</p>
+      <div class="vis">
+        <div class="trigger-demo">
+          <div class="step"><span class="num">1</span><span>Market rips through level</span><span class="t">10:42.08</span></div>
+          <div class="step"><span class="num">2</span><span>You hit <kbd>Save 60s</kbd></span><span class="t">10:42.17</span></div>
+          <div class="step live"><span class="num">3</span><span>Clip hits ~/Movies</span><span class="t">10:42.17</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Specs table -->
+<section class="sec" id="specs">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Specs</span>
+    <h2>The boring, important part.</h2>
+  </div>
+
+  <div class="spec reveal">
+    <div class="spec-row">
+      <span class="k">Buffer length</span>
+      <span class="v">10s · 30s · 60s · 3 min <small>configurable</small></span>
+      <span class="v mono" style="color: var(--fg-faint);">Held in RAM</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Resolution</span>
+      <span class="v">720p · 1080p · 1440p · 4K · Native</span>
+      <span class="v mono" style="color: var(--fg-faint);">Up to display-native DPI</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Frame rate</span>
+      <span class="v">24 · 30 · 60 · 120 fps</span>
+      <span class="v mono" style="color: var(--fg-faint);">120fps on M-series</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Codec</span>
+      <span class="v">H.264 · HEVC · ProRes <small>hardware-accelerated</small></span>
+      <span class="v mono" style="color: var(--fg-faint);">VideoToolbox / NVENC</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Audio</span>
+      <span class="v">System audio · microphone · both</span>
+      <span class="v mono" style="color: var(--fg-faint);">Off by default</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Capture source</span>
+      <span class="v">Full display · window · region · browser tab</span>
+      <span class="v mono" style="color: var(--fg-faint);">Multi-monitor</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">CPU impact</span>
+      <span class="v">Under 3% at 4K · 60fps <small>M2 MacBook Pro</small></span>
+      <span class="v mono" style="color: var(--fg-faint);">Under 6% on Windows</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Disk impact</span>
+      <span class="v">0 bytes until you save</span>
+      <span class="v mono" style="color: var(--fg-faint);">Ring buffer in RAM</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">OS</span>
+      <span class="v">macOS 13+ · Windows 10/11</span>
+      <span class="v mono" style="color: var(--fg-faint);">Apple Silicon + Intel</span>
+    </div>
+    <div class="spec-row">
+      <span class="k">Network</span>
+      <span class="v">Never</span>
+      <span class="v mono" style="color: var(--fg-faint);">Zero telemetry</span>
+    </div>
+  </div>
+</section>
+
+<!-- Roadmap -->
+<section class="sec" id="roadmap">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Roadmap</span>
+    <h2>What we're working on next.</h2>
+    <p>Posted publicly because we respect your time. If something here is blocking you, say so on Discord — it moves up.</p>
+  </div>
+
+  <div class="roadmap reveal">
+    <div class="road-row">
+      <div class="road done">
+        <span class="node"></span>
+        <span class="q">Q4 2025</span>
+        <span class="status">SHIPPED</span>
+        <h6>v2 recorder</h6>
+        <p>Rolling buffer, area monitor, H.264/HEVC/ProRes.</p>
+      </div>
+      <div class="road done">
+        <span class="node"></span>
+        <span class="q">Q1 2026</span>
+        <span class="status">SHIPPED</span>
+        <h6>Windows parity</h6>
+        <p>Same buffer engine on Win 10/11.</p>
+      </div>
+      <div class="road progress">
+        <span class="node"></span>
+        <span class="q">Q2 2026</span>
+        <span class="status">IN PROGRESS</span>
+        <h6>Keyboard shortcuts</h6>
+        <p>Global hotkeys for save, start, stop — per-platform profiles.</p>
+      </div>
+      <div class="road soon">
+        <span class="node"></span>
+        <span class="q">Q3 2026</span>
+        <span class="status">NEXT</span>
+        <h6>Presets</h6>
+        <p>Named setups per platform — TradingView 4K, Sierra DOM, etc.</p>
+      </div>
+      <div class="road soon">
+        <span class="node"></span>
+        <span class="q">Q4 2026</span>
+        <span class="status">SOON</span>
+        <h6>Audio overlay</h6>
+        <p>Record mentor squawks + mic commentary alongside chart.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community FAQ -->
+<section class="sec">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Answers</span>
+    <h2>Trader-specific questions.</h2>
+  </div>
+  <div class="faq reveal">
+    <div class="faq-item"><h6>Can I use it for my funded eval?</h6><p>Yes. Export as MP4 with a timestamp overlay. Works as legal evidence for every major eval firm we've tested.</p></div>
+    <div class="faq-item"><h6>Does my mentor group see the clip?</h6><p>Only if you share it. Clips are written to your local Movies folder. Nothing uploads, nothing syncs.</p></div>
+    <div class="faq-item"><h6>Can I record two charts at once?</h6><p>Yes — run multiple area monitors, each with its own region. They share one buffer engine to keep CPU low.</p></div>
+    <div class="faq-item"><h6>Does it survive a platform restart?</h6><p>ClipCatch tracks the window, not the process. Restart NinjaTrader, MotiveWave, whatever — ClipCatch reacquires when the window comes back.</p></div>
+    <div class="faq-item"><h6>What about crypto exchanges?</h6><p>Same deal. If it's on your screen — Bybit, Bitget, TradingView on BTCUSD — we record it.</p></div>
+    <div class="faq-item"><h6>I trade on my iPad. Help?</h6><p>You'd need an iPad on your Mac (Sidecar or mirroring). Once it's on the desktop, ClipCatch captures it like any other source.</p></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="footer-cta reveal">
+    <span class="brand-mark" style="width:56px; height:56px; margin: 0 auto 24px; display:block;"></span>
+    <h2>The screen recorder built for the tape.</h2>
+    <p>Free. No account. Made by people who open the same platform as you at 9:28 ET.</p>
+    <div class="hero-cta">
+      <button class="btn-rec btn-xl">
+        <span class="pulse"><span class="circ"></span></span>
+        Download for Mac
+      </button>
+      <button class="btn btn-xl">Download for Windows</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <a href="ClipCatch Website.html" class="brand"><span class="brand-mark sm"></span>ClipCatch</a>
+    <span>© 2026 · Built by traders.</span>
+    <span style="margin-left:auto; display:flex; gap: 18px;">
+      <a href="ClipCatch Website.html">Home</a>
+      <a href="ClipCatch Website.html#how">How it works</a>
+      <a href="ClipCatch Website.html#compat">Platforms</a>
+      <a href="ClipCatch Website.html#pricing">Pricing</a>
+    </span>
+  </div>
+</footer>
+
+</div>
+
+<script>
+// Zone-demo chart bars
+(function(){
+  const w = document.getElementById('zoneStrip');
+  if (!w) return;
+  const N = 40;
+  let price = 5240;
+  for (let i = 0; i < N; i++) {
+    const up = Math.random() > 0.46;
+    const cx = document.createElement('div');
+    cx.className = 'cx ' + (up ? 'up' : 'dn');
+    cx.style.height = (25 + Math.random() * 60) + '%';
+    // Highlight last bar
+    if (i === N - 1) {
+      cx.style.background = 'oklch(0.78 0.18 255)';
+      cx.style.boxShadow = '0 0 10px oklch(0.68 0.18 255 / 0.7)';
+      cx.style.height = '72%';
+    }
+    w.appendChild(cx);
+  }
+})();
+
+// Scroll reveal
+(function(){
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>

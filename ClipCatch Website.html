@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ClipCatch — Built by traders. Never miss the setup again.</title>
+<meta name="viewport" content="width=1440"/>
+<link rel="stylesheet" href="app/tokens.css"/>
+<link rel="icon" href="app/logo.png"/>
+<style>
+  html, body { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1400px 900px at 20% -10%, oklch(0.26 0.04 260) 0%, transparent 60%),
+      radial-gradient(1200px 900px at 110% 40%, oklch(0.22 0.08 255) 0%, transparent 55%),
+      oklch(0.085 0.008 260);
+  }
+  .site { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── Nav ── */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    background: oklch(0.09 0.008 260 / 0.85);
+    border-bottom: 0.5px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1280px; margin: 0 auto; padding: 14px 32px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 16px; color: var(--fg);
+    letter-spacing: -0.01em; text-decoration: none;
+  }
+  .brand-mark {
+    width: 32px; height: 32px;
+    background: url('app/logo.png') center / contain no-repeat;
+    filter: drop-shadow(0 4px 10px oklch(0.55 0.22 255 / 0.45));
+  }
+  .brand-mark.sm { width: 22px; height: 22px; }
+  .brand-mark.lg { width: 56px; height: 56px; }
+
+  .nav-links { display: flex; gap: 24px; margin-left: 16px; }
+  .nav-links a {
+    color: var(--fg-mute); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-cta { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .nav-cta .btn { height: 32px; padding: 0 12px; font-size: 12.5px; border-radius: 7px; }
+
+  /* ── Hero ── */
+  .hero { padding: 72px 0 40px; text-align: center; display: flex; flex-direction: column; gap: 28px; align-items: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 5px 14px 5px 6px; border-radius: 999px;
+    background: var(--bg-card);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    font-size: 12px; color: var(--fg-mute);
+  }
+  .badge .pill {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--rec-soft); color: var(--rec);
+    box-shadow: inset 0 0 0 0.5px var(--rec-glow);
+    letter-spacing: 0.06em;
+  }
+  h1 {
+    margin: 0; font-size: 92px; font-weight: 600;
+    letter-spacing: -0.04em; line-height: 0.98;
+    color: var(--fg);
+    max-width: 1000px;
+    text-wrap: balance;
+  }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(180deg, oklch(0.82 0.16 255), oklch(0.52 0.22 260));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-sub {
+    max-width: 660px; margin: 0 auto;
+    font-size: 19px; line-height: 1.5;
+    color: var(--fg-mute);
+    text-wrap: pretty;
+  }
+  .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-xl { height: 52px; padding: 0 22px; border-radius: 12px; font-size: 14.5px; }
+  .platform-chips {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    color: var(--fg-faint); font-size: 12px; font-family: var(--mono);
+  }
+  .platform-chips .p {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--bg-card);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+
+  /* ── Tickers marquee (above hero mock) ── */
+  .tickers {
+    width: 100%; overflow: hidden; margin: 12px 0 0;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker-track {
+    display: flex; gap: 36px; padding: 10px 0;
+    animation: tickerScroll 32s linear infinite;
+    width: max-content;
+  }
+  @keyframes tickerScroll { to { transform: translateX(-50%); } }
+  .tick {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 13px; white-space: nowrap;
+  }
+  .tick .sym { color: var(--fg); font-weight: 600; letter-spacing: 0.01em; }
+  .tick .px  { color: var(--fg-mute); }
+  .tick .up   { color: var(--match); }
+  .tick .down { color: oklch(0.65 0.22 25); }
+  .tick .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--fg-dim); }
+
+  /* ── Hero product mockup ── */
+  .hero-product {
+    position: relative;
+    margin: 32px auto 0;
+    display: flex; justify-content: center;
+    width: 100%;
+  }
+  .hero-product::before {
+    content: ''; position: absolute; inset: 15% -5% 0;
+    background: radial-gradient(50% 60% at 50% 30%, oklch(0.55 0.22 255 / 0.28), transparent 70%);
+    filter: blur(50px);
+    z-index: 0;
+  }
+  .mock-window {
+    position: relative; z-index: 1;
+    width: 1180px; height: 720px;
+    border-radius: 14px; overflow: hidden;
+    background: oklch(0.13 0.008 260);
+    box-shadow:
+      0 0 0 0.5px rgba(255,255,255,0.08),
+      0 40px 120px -20px rgba(0,0,0,0.75),
+      0 0 0 1px rgba(0,0,0,0.4);
+  }
+  .mock-titlebar {
+    height: 44px; border-bottom: 0.5px solid var(--line);
+    background: linear-gradient(to bottom, oklch(0.19 0.008 260), oklch(0.16 0.008 260));
+    display: flex; align-items: center; padding: 0 14px; gap: 12px;
+    position: relative;
+  }
+  .mock-titlebar .lights { display: flex; gap: 8px; }
+  .mock-titlebar .lights span { width: 12px; height: 12px; border-radius: 50%; }
+  .mock-titlebar .lights span:nth-child(1) { background: #ff5f57; }
+  .mock-titlebar .lights span:nth-child(2) { background: #febc2e; }
+  .mock-titlebar .lights span:nth-child(3) { background: #28c840; }
+  .mock-titlebar .title-left {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--fg); font-weight: 600; font-size: 14px;
+    margin-left: 18px;
+  }
+  .mock-tabs {
+    margin-left: auto; display: flex; gap: 4px;
+    padding: 3px; border-radius: 8px;
+    background: oklch(0.10 0.008 260);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .mock-tabs button {
+    appearance: none; border: 0;
+    padding: 5px 12px; border-radius: 6px;
+    font: inherit; font-size: 12px; font-weight: 500;
+    color: var(--fg-mute); background: transparent; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .mock-tabs button.on {
+    background: var(--rec); color: #fff;
+    box-shadow: 0 1px 0 oklch(1 0 0 / 0.2) inset, 0 2px 6px oklch(0.55 0.20 255 / 0.35);
+  }
+
+  /* ── Trading chart (inside hero preview) ── */
+  .chart-wrap {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 72px;
+    grid-template-rows: 36px 1fr 90px;
+  }
+  .chart-head {
+    grid-column: 1 / -1;
+    padding: 0 16px;
+    display: flex; align-items: center; gap: 16px;
+    font-size: 12px; color: var(--fg-mute);
+    border-bottom: 0.5px solid oklch(0.22 0.008 260);
+    background: oklch(0.11 0.008 260);
+  }
+  .chart-head .sym { color: var(--fg); font-weight: 700; font-size: 14px; letter-spacing: 0.01em; }
+  .chart-head .price { font-family: var(--mono); color: var(--match); font-weight: 600; font-size: 14px; }
+  .chart-head .chg { font-family: var(--mono); color: var(--match); font-size: 12px; }
+  .chart-head .tf { margin-left: auto; display: inline-flex; gap: 3px; padding: 2px; background: oklch(0.09 0.008 260); border-radius: 6px; }
+  .chart-head .tf b {
+    padding: 3px 8px; border-radius: 4px; font-family: var(--mono);
+    font-size: 11px; font-weight: 500; color: var(--fg-faint);
+  }
+  .chart-head .tf b.on { background: oklch(0.18 0.008 260); color: var(--fg); }
+
+  .chart-body {
+    position: relative; overflow: hidden;
+    background:
+      linear-gradient(to right, transparent 0, transparent 1px) repeat-x,
+      linear-gradient(to bottom, transparent 0, transparent 1px) repeat-y,
+      oklch(0.12 0.008 260);
+    grid-column: 1;
+  }
+  .chart-body::before {
+    /* horizontal gridlines */
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to bottom, oklch(0.22 0.008 260) 1px, transparent 1px),
+      linear-gradient(to right, oklch(0.22 0.008 260) 1px, transparent 1px);
+    background-size: 100% 12.5%, 6% 100%;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .chart-axis {
+    grid-column: 2;
+    border-left: 0.5px solid oklch(0.22 0.008 260);
+    background: oklch(0.11 0.008 260);
+    padding: 6px 10px;
+    font-family: var(--mono); font-size: 10px; color: var(--fg-faint);
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative;
+  }
+  .chart-axis .lbl { text-align: right; }
+  .chart-axis .live {
+    position: absolute; right: 6px;
+    background: var(--match); color: #061a14;
+    font-family: var(--mono); font-weight: 700; font-size: 10px;
+    padding: 3px 6px; border-radius: 3px;
+    box-shadow: 0 0 0 0.5px oklch(1 0 0 / 0.2);
+  }
+  .chart-axis .live::before {
+    content: '';
+    position: absolute; right: 100%; top: 50%;
+    width: 1100px; height: 1px;
+    background: repeating-linear-gradient(to left, var(--match) 0 4px, transparent 4px 8px);
+  }
+
+  .chart-foot {
+    grid-column: 1 / -1;
+    background: oklch(0.10 0.008 260);
+    border-top: 0.5px solid oklch(0.22 0.008 260);
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-foot .vol-bars {
+    position: absolute; inset: 10px 80px 14px 16px;
+    display: flex; gap: 2px; align-items: flex-end;
+  }
+  .chart-foot .vol-bars div {
+    flex: 1; background: oklch(0.35 0.06 255);
+    opacity: 0.6; border-radius: 1px 1px 0 0;
+  }
+  .chart-foot .vol-bars div.up   { background: oklch(0.55 0.15 155); }
+  .chart-foot .vol-bars div.dn   { background: oklch(0.55 0.18 25); }
+  .chart-foot .vol-lbl {
+    position: absolute; left: 16px; top: 6px;
+    font-family: var(--mono); font-size: 10px; color: var(--fg-faint);
+  }
+
+  /* The actual candlesticks — positioned absolute inside .chart-body */
+  .candles { position: absolute; inset: 14px 2px 14px 14px; display: flex; align-items: stretch; gap: 3px; }
+  .cd { flex: 1; position: relative; display: flex; justify-content: center; }
+  .cd .wick { position: absolute; width: 1px; background: currentColor; }
+  .cd .body { position: absolute; width: 70%; min-width: 4px; background: currentColor; border-radius: 1px; }
+  .cd.up   { color: oklch(0.68 0.15 155); }
+  .cd.dn   { color: oklch(0.62 0.20 25); }
+  .cd.doji { color: var(--fg-faint); }
+  .cd.live { color: oklch(0.78 0.18 255); }
+  .cd.live .body { box-shadow: 0 0 14px oklch(0.68 0.18 255 / 0.8); animation: candleLive 1.2s ease-in-out infinite; }
+  @keyframes candleLive {
+    0%,100% { transform: scaleY(1); }
+    50%     { transform: scaleY(1.04); }
+  }
+
+  /* EMA line */
+  .ema { position: absolute; inset: 0; pointer-events: none; }
+
+  /* Area rectangle — newest bar (right edge) */
+  .area-live {
+    position: absolute;
+    top: 12%; right: 86px; width: 96px; bottom: 22%;
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1.5px var(--match),
+      inset 0 0 0 1px oklch(1 0 0 / 0.03);
+    background: oklch(0.74 0.15 155 / 0.06);
+    pointer-events: none; z-index: 2;
+  }
+  .area-live::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 6px;
+    box-shadow: 0 0 0 0 oklch(0.74 0.15 155 / 0);
+    animation: matchBreath 2.4s ease-in-out infinite;
+  }
+  @keyframes matchBreath {
+    0%,100% { box-shadow: 0 0 0 4px oklch(0.74 0.15 155 / 0.05); }
+    50%     { box-shadow: 0 0 0 14px oklch(0.74 0.15 155 / 0.18); }
+  }
+  .area-live .tag {
+    position: absolute; top: -24px; right: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--match);
+    padding: 3px 7px; border-radius: 4px;
+    background: oklch(0.09 0.008 260 / 0.92);
+    box-shadow: inset 0 0 0 0.5px oklch(0.74 0.15 155 / 0.4);
+    white-space: nowrap;
+  }
+  .area-live .tag .d {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--match);
+    box-shadow: 0 0 6px var(--match);
+    animation: matchBlink 1.4s ease-in-out infinite;
+  }
+  @keyframes matchBlink { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
+
+  /* HUD overlays */
+  .hud {
+    position: absolute; left: 16px; top: 52px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 3;
+  }
+  .hud-card {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 7px 12px; border-radius: 8px;
+    background: oklch(0.10 0.008 260 / 0.85);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: inset 0 0 0 0.5px oklch(1 0 0 / 0.08), 0 8px 24px rgba(0,0,0,0.4);
+    color: #fff; font-size: 12px; font-weight: 500;
+  }
+  .hud-card .pip {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--rec); box-shadow: 0 0 8px var(--rec-glow);
+    animation: recPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes recPulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+  .hud-card .lbl { font-weight: 600; }
+  .hud-card .num { font-family: var(--mono); font-size: 11px; opacity: 0.7; }
+  .hud-card.match-c .pip { background: var(--match); box-shadow: 0 0 8px var(--match); }
+  .hud-card.match-c .lbl { color: var(--match); }
+
+  /* Transport dock under chart in mock */
+  .dock {
+    display: grid; grid-template-columns: 220px 1fr 220px;
+    align-items: center; gap: 16px;
+    padding: 14px 20px 16px;
+    border-top: 0.5px solid var(--line);
+    background: oklch(0.11 0.008 260);
+    overflow: hidden;
+  }
+
+  /* ── Section shell ── */
+  section.sec { padding: 120px 0; }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 48px; max-width: 720px; }
+  .sec-head.center { margin: 0 auto 48px; text-align: center; align-items: center; }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--rec);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--rec); }
+  .sec-head h2 {
+    margin: 0; font-size: 56px; font-weight: 600; letter-spacing: -0.03em;
+    line-height: 1.02; color: var(--fg); text-wrap: balance;
+  }
+  .sec-head p {
+    margin: 0; font-size: 17px; line-height: 1.55;
+    color: var(--fg-mute); max-width: 640px; text-wrap: pretty;
+  }
+
+  /* ── Platform / compat grid ── */
+  .compat {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  }
+  .compat-row { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .compat-row .line { flex: 1; height: 1px; background: var(--line-soft); }
+  .compat-row span { color: var(--fg-faint); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .compat-item {
+    background: var(--bg-card); border-radius: 10px; padding: 18px 16px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 96px;
+    position: relative;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .compat-item:hover {
+    box-shadow: inset 0 0 0 0.5px oklch(0.68 0.18 255 / 0.5), 0 12px 32px -12px oklch(0.55 0.20 255 / 0.35);
+    transform: translateY(-1px);
+  }
+  .compat-item .logo-glyph {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--bg-inset);
+    display: grid; place-items: center;
+    color: var(--fg-mute);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+  }
+  .compat-item .nm { color: var(--fg); font-size: 13px; font-weight: 600; }
+  .compat-item .sub { color: var(--fg-faint); font-size: 11px; }
+  .compat-item .ok {
+    position: absolute; top: 12px; right: 12px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--match-soft); color: var(--match);
+    display: grid; place-items: center;
+    box-shadow: inset 0 0 0 0.5px oklch(0.74 0.15 155 / 0.4);
+  }
+
+  /* ── Use-case cards ── */
+  .usecases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .uc {
+    background: var(--bg-card); border-radius: 14px; padding: 24px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    display: flex; flex-direction: column; gap: 14px;
+    position: relative; overflow: hidden;
+  }
+  .uc .tag {
+    align-self: flex-start;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--rec-soft); color: var(--rec);
+    box-shadow: inset 0 0 0 0.5px var(--rec-glow);
+  }
+  .uc h4 { margin: 0; color: var(--fg); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .uc p { margin: 0; color: var(--fg-mute); font-size: 14px; line-height: 1.55; }
+  .uc .demo {
+    height: 140px; border-radius: 8px; margin-top: 6px;
+    background: oklch(0.10 0.008 260);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    position: relative; overflow: hidden;
+  }
+
+  /* ── Buffer strip ── */
+  .feature-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .feature-visual {
+    position: relative; aspect-ratio: 4/3;
+    background: var(--bg-card); border-radius: 16px;
+    box-shadow: inset 0 0 0 0.5px var(--line), 0 20px 60px -20px rgba(0,0,0,0.5);
+    overflow: hidden; padding: 32px;
+    display: flex; flex-direction: column; justify-content: center; gap: 16px;
+  }
+  .buf-timeline { display: flex; align-items: flex-end; gap: 2px; height: 100px; padding: 0 8px; }
+  .buf-timeline .t {
+    flex: 1; border-radius: 1px; background: var(--bg-inset);
+    animation: bufWave 2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.02s);
+  }
+  .buf-timeline .t.recent { background: var(--rec); }
+  .buf-timeline .t.live  { background: linear-gradient(180deg, oklch(0.78 0.18 255), var(--rec)); box-shadow: 0 0 12px var(--rec-glow); }
+  @keyframes bufWave {
+    0%,100% { transform: scaleY(1); }
+    50%     { transform: scaleY(0.6); }
+  }
+  .buf-labels { display: flex; justify-content: space-between; color: var(--fg-faint); font-size: 11px; font-family: var(--mono); padding: 0 8px; }
+  .buf-marker { position: absolute; right: 32px; top: 32px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .buf-marker .n { font-family: var(--mono); font-size: 32px; font-weight: 600; color: var(--fg); line-height: 1; }
+  .buf-marker .l { color: var(--fg-faint); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── Testimonials ── */
+  .quotes { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr; gap: 16px; }
+  .q {
+    background: var(--bg-card); border-radius: 14px; padding: 24px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    display: flex; flex-direction: column; gap: 16px;
+    position: relative;
+  }
+  .q blockquote { margin: 0; color: var(--fg); font-size: 17px; line-height: 1.45; letter-spacing: -0.005em; }
+  .q.big blockquote { font-size: 22px; line-height: 1.35; font-weight: 500; }
+  .q .who { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+  .q .av {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, oklch(0.70 0.16 255), oklch(0.48 0.20 265));
+    display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 13px;
+  }
+  .q .nm { color: var(--fg); font-size: 13px; font-weight: 600; }
+  .q .meta { color: var(--fg-faint); font-size: 12px; font-family: var(--mono); }
+
+  /* ── Stats ── */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    padding: 48px 40px; border-radius: 16px;
+    background:
+      radial-gradient(600px 300px at 50% 0%, oklch(0.55 0.22 255 / 0.12), transparent 70%),
+      var(--bg-card);
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .stat { display: flex; flex-direction: column; gap: 6px; }
+  .stat .n { font-size: 48px; font-weight: 600; letter-spacing: -0.03em; color: var(--fg); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .n small { font-size: 20px; color: var(--fg-mute); margin-left: 4px; font-weight: 500; }
+  .stat .l { color: var(--fg-faint); font-size: 12.5px; }
+
+  /* ── Pricing — single tier ── */
+  .pricing-solo {
+    max-width: 520px; margin: 0 auto;
+    background: linear-gradient(180deg, oklch(0.22 0.015 260), oklch(0.17 0.012 260));
+    border-radius: 20px; padding: 40px;
+    box-shadow:
+      inset 0 0 0 1px oklch(0.68 0.18 255 / 0.35),
+      0 0 0 6px oklch(0.68 0.18 255 / 0.06),
+      0 30px 80px -20px oklch(0.55 0.20 255 / 0.35);
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .pricing-solo::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(400px 200px at 50% 0%, oklch(0.55 0.22 255 / 0.18), transparent 70%);
+    pointer-events: none;
+  }
+  .pricing-solo .tag {
+    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--rec); letter-spacing: 0.08em;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--rec-soft);
+    box-shadow: inset 0 0 0 0.5px var(--rec-glow);
+    margin-bottom: 16px;
+  }
+  .pricing-solo h3 { margin: 0 0 8px; font-size: 36px; font-weight: 600; letter-spacing: -0.025em; color: var(--fg); }
+  .pricing-solo .free {
+    font-size: 80px; font-weight: 600; letter-spacing: -0.04em; line-height: 1;
+    background: linear-gradient(180deg, oklch(0.82 0.16 255), oklch(0.52 0.22 260));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin: 20px 0 6px;
+  }
+  .pricing-solo .note { color: var(--fg-mute); font-size: 14px; margin-bottom: 24px; }
+  .pricing-solo ul { list-style: none; padding: 0; margin: 0 auto 28px; max-width: 320px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+  .pricing-solo ul li {
+    display: grid; grid-template-columns: 18px 1fr; gap: 10px;
+    color: var(--fg-mute); font-size: 14px; line-height: 1.4;
+  }
+  .pricing-solo ul li svg { color: var(--match); margin-top: 2px; }
+
+  /* ── FAQ ── */
+  .faq { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .faq-item {
+    background: var(--bg-card); border-radius: 10px; padding: 22px 24px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .faq-item h6 { margin: 0 0 8px; color: var(--fg); font-size: 14px; font-weight: 600; }
+  .faq-item p  { margin: 0; color: var(--fg-mute); font-size: 13px; line-height: 1.6; }
+
+  /* ── Footer CTA ── */
+  .footer-cta {
+    position: relative;
+    padding: 96px 48px;
+    border-radius: 24px;
+    background:
+      radial-gradient(700px 400px at 50% 30%, oklch(0.55 0.22 255 / 0.22), transparent 60%),
+      linear-gradient(180deg, oklch(0.22 0.02 260), oklch(0.14 0.012 260));
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    text-align: center;
+    overflow: hidden;
+  }
+  .footer-cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent 0 20px, oklch(0.55 0.22 255 / 0.04) 20px 21px);
+    pointer-events: none;
+  }
+  .footer-cta h2 { font-size: 64px; margin: 0 auto 16px; max-width: 720px; }
+  .footer-cta p { margin: 0 auto 32px; max-width: 540px; color: var(--fg-mute); font-size: 17px; line-height: 1.55; }
+
+  footer { padding: 48px 0 32px; border-top: 0.5px solid var(--line); margin-top: 64px; }
+  .foot-inner { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; color: var(--fg-faint); font-size: 12px; }
+  .foot-inner a { color: var(--fg-mute); text-decoration: none; }
+  .foot-inner a:hover { color: var(--fg); }
+
+  /* ── Scroll-reveal ── */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ── Manifesto section ── */
+  .manifesto {
+    background: oklch(0.10 0.008 260); border-radius: 20px;
+    padding: 72px 56px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+    position: relative; overflow: hidden;
+  }
+  .manifesto::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(600px 400px at 85% 50%, oklch(0.55 0.22 255 / 0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .manifesto-inner { position: relative; display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: center; }
+  .manifesto h2 { font-size: 52px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 24px; color: var(--fg); text-wrap: balance; }
+  .manifesto p { color: var(--fg-mute); font-size: 17px; line-height: 1.6; margin: 0 0 14px; }
+  .manifesto .signature {
+    margin-top: 24px;
+    font-family: var(--mono); font-size: 12px; color: var(--fg-faint);
+  }
+  .manifesto .right {
+    padding: 24px;
+    background: oklch(0.08 0.008 260); border-radius: 14px;
+    box-shadow: inset 0 0 0 0.5px var(--line);
+  }
+  .manifesto .setup-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--line-soft); font-size: 13px; }
+  .manifesto .setup-row:last-child { border-bottom: 0; }
+  .manifesto .setup-row .k { color: var(--fg-mute); font-family: var(--mono); font-size: 12px; }
+  .manifesto .setup-row .v { color: var(--fg); font-weight: 500; }
+
+  /* ── How it works strip ── */
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: var(--bg-card); border-radius: 16px; box-shadow: inset 0 0 0 0.5px var(--line); overflow: hidden; }
+  .flow-step { padding: 32px 28px; display: flex; flex-direction: column; gap: 14px; border-right: 0.5px solid var(--line); position: relative; }
+  .flow-step:last-child { border-right: 0; }
+  .flow-step .num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--rec); letter-spacing: 0.08em; }
+  .flow-step h5 { margin: 0; color: var(--fg); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .flow-step p { margin: 0; color: var(--fg-mute); font-size: 13.5px; line-height: 1.6; }
+  .flow-step .dem { height: 120px; border-radius: 8px; background: oklch(0.11 0.008 260); box-shadow: inset 0 0 0 0.5px var(--line); margin-top: 4px; position: relative; overflow: hidden; }
+
+  kbd { font-family: var(--mono); font-size: 11px; padding: 2px 6px; border-radius: 4px; background: var(--bg-inset); box-shadow: inset 0 0 0 0.5px var(--line); color: var(--fg); }
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- ── Nav ── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand"><span class="brand-mark"></span>ClipCatch</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#compat">Works with</a>
+      <a href="#usecases">Use cases</a>
+      <a href="#quotes">Traders</a>
+      <a href="traders.html">For traders</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#download" style="text-decoration:none;">
+        <button class="btn-rec" style="height:34px; padding:0 16px; font-size:13px; border-radius:8px;">
+          <span class="pulse"><span class="circ"></span></span>
+          Download free
+        </button>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="site" id="top">
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="badge">
+    <span class="pill">Free · v2</span>
+    Built by traders. No account. No trial. Just record.
+  </div>
+  <h1>Never miss<br/>the <em>setup</em> again.</h1>
+  <p class="hero-sub">
+    ClipCatch keeps the last sixty seconds of your chart always ready to save.
+    You saw the tape rip — hit <kbd>save</kbd> and the move is on disk.
+    One app, every platform you trade on.
+  </p>
+  <div class="hero-cta">
+    <button class="btn-rec btn-xl">
+      <span class="pulse"><span class="circ"></span></span>
+      Download for Mac
+    </button>
+    <button class="btn btn-xl">
+      <svg class="i" viewBox="0 0 20 20" style="width:16px;height:16px"><path d="M3 3h7v7H3zM10 3h7v7h-7zM3 10h7v7H3zM10 10h7v7h-7z" fill="currentColor" stroke="none"/></svg>
+      Download for Windows
+    </button>
+  </div>
+  <div class="platform-chips">
+    <span class="p">● Apple Silicon</span>
+    <span class="p">● Intel x64</span>
+    <span class="p">● Windows 10/11</span>
+    <span class="p">● 84 MB</span>
+    <span class="p">● Free · Always</span>
+  </div>
+
+  <!-- Tickers marquee -->
+  <div class="tickers" aria-hidden="true">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Hero product mock — trading chart edition -->
+  <div class="hero-product">
+    <div class="mock-window">
+      <div class="mock-titlebar">
+        <div class="lights"><span></span><span></span><span></span></div>
+        <div class="title-left">
+          <span class="brand-mark sm"></span>
+          ClipCatch
+        </div>
+        <div class="mock-tabs">
+          <button class="on">
+            <svg class="i" viewBox="0 0 16 16" style="width:12px;height:12px"><circle cx="8" cy="8" r="3" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="6"/></svg>
+            Recorder
+          </button>
+          <button>
+            <svg class="i" viewBox="0 0 16 16" style="width:12px;height:12px"><rect x="2" y="2" width="12" height="12" rx="2" stroke-dasharray="2 2"/></svg>
+            Area monitor
+          </button>
+          <button>
+            <svg class="i" viewBox="0 0 16 16" style="width:12px;height:12px"><rect x="2" y="3" width="12" height="10" rx="1.5"/></svg>
+            Clips
+          </button>
+          <button>
+            <svg class="i" viewBox="0 0 16 16" style="width:12px;height:12px"><circle cx="8" cy="8" r="2.5"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M4 4l1.5 1.5M10.5 10.5L12 12M4 12l1.5-1.5M10.5 5.5L12 4"/></svg>
+            Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Live chart canvas -->
+      <div style="position:relative; height: calc(720px - 44px - 70px);">
+        <div class="chart-wrap">
+          <div class="chart-head">
+            <span class="sym">ES · E-mini S&amp;P 500</span>
+            <span class="price" id="chartPrice">5 248.75</span>
+            <span class="chg" id="chartChg">+ 18.25 · +0.35%</span>
+            <span style="color: var(--fg-faint);">·</span>
+            <span style="color: var(--fg-faint); font-family: var(--mono); font-size: 11px;">SEP25 · CME</span>
+            <div class="tf">
+              <b>1m</b><b class="on">5m</b><b>15m</b><b>1h</b><b>D</b>
+            </div>
+          </div>
+
+          <div class="chart-body" id="chartBody">
+            <div class="candles" id="candles"></div>
+            <svg class="ema" id="emaSvg" preserveAspectRatio="none" viewBox="0 0 100 100"><path d="" stroke="oklch(0.78 0.18 60)" stroke-width="0.4" fill="none" vector-effect="non-scaling-stroke"/></svg>
+
+            <!-- Area monitor — positioned on the NEWEST bar, right edge -->
+            <div class="area-live">
+              <span class="tag"><span class="d"></span>MONITORING · Δ 0.02</span>
+            </div>
+
+            <!-- HUD -->
+            <div class="hud">
+              <div class="hud-card">
+                <span class="pip"></span>
+                <span class="lbl" style="color: var(--rec);">Recording</span>
+                <span class="num">00:42 · 4K 60 · H.264</span>
+              </div>
+              <div class="hud-card match-c">
+                <span class="pip"></span>
+                <span class="lbl">Area monitor</span>
+                <span class="num">armed · latest bar · Δ 0.02 / 0.20</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-axis" id="chartAxis">
+            <span class="lbl">5 280</span>
+            <span class="lbl">5 260</span>
+            <span class="lbl">5 240</span>
+            <span class="lbl">5 220</span>
+            <span class="lbl">5 200</span>
+            <span class="live" id="livePrice" style="top: 30%;">5 248.75</span>
+          </div>
+
+          <div class="chart-foot">
+            <span class="vol-lbl">VOL · 18.4k</span>
+            <div class="vol-bars" id="volBars"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transport dock -->
+      <div class="dock">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div style="width:44px; height:28px; border-radius:4px; background: repeating-linear-gradient(135deg, var(--bg-inset) 0 4px, var(--bg-elev) 4px 8px); box-shadow: inset 0 0 0 0.5px var(--line);"></div>
+          <div>
+            <div style="color:var(--fg); font-size:12px; font-weight:500;">Recording to ~/Movies</div>
+            <div style="color:var(--fg-faint); font-size:11px; font-family:var(--mono);">ES_2026-04-23_10-42.mp4</div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:center; gap:12px; align-items:center;">
+          <button class="btn-rec live" style="height: 40px; border-radius: 10px;">
+            <span class="pulse"><span class="sq"></span></span>
+            <span>Stop</span>
+            <span class="timer">00:42.18</span>
+          </button>
+          <button class="btn" style="white-space:nowrap; height: 40px; border-radius: 10px;">Save <b class="mono" style="color:var(--fg); margin-left:4px;">60s</b></button>
+        </div>
+        <div style="justify-self:end; display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+          <div style="display:flex; gap:8px; align-items:baseline;">
+            <span style="color:var(--fg-mute); font-size:10px; letter-spacing:0.04em; text-transform:uppercase;">Buffer</span>
+            <span style="color:var(--fg); font-family:var(--mono); font-size:12px;">60s / 60s</span>
+          </div>
+          <div style="width:160px; height:4px; border-radius:2px; background:var(--bg-inset); box-shadow: inset 0 0 0 0.5px var(--line); position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0 30% 0 0; background: linear-gradient(90deg, transparent, var(--rec));"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Manifesto ── -->
+<section class="sec" id="manifesto">
+  <div class="manifesto reveal">
+    <div class="manifesto-inner">
+      <div>
+        <span class="eyebrow">A letter from a futures trader</span>
+        <h2>I built this because I kept missing my own setups.</h2>
+        <p>Six thousand hours on the tape. I'd watch a textbook failed breakdown, print the exact bar I'd been waiting for, and realize I didn't have the chart.</p>
+        <p>OBS eats my CPU. QuickTime fills my SSD with garbage clips. Screen-recording apps want my email, a subscription, and a tour of their AI. I wanted something that stays out of the way — and when I say "save the last minute," saves the last minute.</p>
+        <p>So I built it. For you, for me, for my funded friends who keep DMing me "bro did you catch that." Yeah. I caught it.</p>
+        <div class="signature">— Built by traders · shipped from the trenches</div>
+      </div>
+      <div class="right">
+        <div style="color:var(--fg-faint); font-size:11px; font-family: var(--mono); margin-bottom:12px; letter-spacing: 0.06em; text-transform: uppercase;">Setup log · today</div>
+        <div class="setup-row"><span class="k">09:31 ET</span><span class="v">ES failed breakdown · 10s clip</span></div>
+        <div class="setup-row"><span class="k">10:04 ET</span><span class="v">NQ double top reject · 22s</span></div>
+        <div class="setup-row"><span class="k">10:42 ET</span><span class="v">ES VWAP bounce · recording…</span></div>
+        <div class="setup-row"><span class="k">11:17 ET</span><span class="v">QQQ liq sweep · 14s</span></div>
+        <div class="setup-row"><span class="k">13:58 ET</span><span class="v">GC breakout · 31s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section class="sec" id="how">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">How it works</span>
+    <h2>Three things. That's the whole app.</h2>
+    <p>No tutorial. No onboarding. Open it, pick what to record, trade.</p>
+  </div>
+
+  <div class="flow reveal">
+    <div class="flow-step">
+      <span class="num">01 · BACKGROUND</span>
+      <h5>It's quietly recording your chart.</h5>
+      <p>The last 60 seconds (or 3 min) live in RAM. Nothing on disk. Under 3% CPU on Apple Silicon. You forget it's there.</p>
+      <div class="dem">
+        <div style="position:absolute; inset: 20px; display: flex; align-items: flex-end; gap: 2px;">
+          <div style="height: 40%; flex: 1; background: oklch(0.35 0.06 255); border-radius: 1px;"></div>
+          <div style="height: 60%; flex: 1; background: oklch(0.45 0.10 255); border-radius: 1px;"></div>
+          <div style="height: 50%; flex: 1; background: oklch(0.40 0.08 255); border-radius: 1px;"></div>
+          <div style="height: 80%; flex: 1; background: oklch(0.55 0.15 255); border-radius: 1px;"></div>
+          <div style="height: 70%; flex: 1; background: oklch(0.50 0.12 255); border-radius: 1px;"></div>
+          <div style="height: 90%; flex: 1; background: oklch(0.65 0.18 255); box-shadow: 0 0 8px oklch(0.65 0.18 255 / 0.6); border-radius: 1px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="num">02 · THE MOMENT</span>
+      <h5>The move prints. You save.</h5>
+      <p>Hit <b>Save 60s</b> — or let the Area Monitor auto-save when the newest candle moves hard. The clip is already rendered.</p>
+      <div class="dem">
+        <div style="position:absolute; inset:0; display: grid; place-items: center;">
+          <div style="display: flex; gap: 10px; align-items: center; padding: 10px 16px; border-radius: 10px; background: oklch(0.15 0.008 260); box-shadow: inset 0 0 0 0.5px var(--line), 0 0 0 3px oklch(0.68 0.18 255 / 0.15);">
+            <div style="width: 18px; height: 18px; border-radius: 5px; background: #fff; display: grid; place-items: center;">
+              <div style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.55 0.20 255);"></div>
+            </div>
+            <span style="color: var(--fg); font-size: 13px; font-weight: 600;">Save 60s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="num">03 · KEEP TRADING</span>
+      <h5>Clip is on disk. Review at the close.</h5>
+      <p>MP4, H.264, named with the ticker and time. Open with anything. Drop in Notion, Discord, Journalytix — wherever your journal lives.</p>
+      <div class="dem">
+        <div style="position:absolute; inset: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 6px; background: oklch(0.13 0.008 260); box-shadow: inset 0 0 0 0.5px var(--line);">
+            <div style="width: 22px; height: 16px; border-radius: 2px; background: repeating-linear-gradient(135deg, oklch(0.25 0.04 255) 0 3px, oklch(0.20 0.04 255) 3px 6px);"></div>
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--fg-mute);">ES_2026-04-23_10-42.mp4</div>
+            <span style="margin-left: auto; color: var(--fg-faint); font-family: var(--mono); font-size: 10px;">00:58</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 6px; background: oklch(0.13 0.008 260); box-shadow: inset 0 0 0 0.5px var(--line);">
+            <div style="width: 22px; height: 16px; border-radius: 2px; background: repeating-linear-gradient(135deg, oklch(0.25 0.04 255) 0 3px, oklch(0.20 0.04 255) 3px 6px);"></div>
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--fg-mute);">NQ_2026-04-23_10-04.mp4</div>
+            <span style="margin-left: auto; color: var(--fg-faint); font-family: var(--mono); font-size: 10px;">00:22</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Compatibility grid ── -->
+<section class="sec" id="compat">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">Works with everything</span>
+    <h2>Your platform, your charts, your way.</h2>
+    <p>ClipCatch records <b>what's on screen</b> — so it works with every trading platform, period. Here are the ones our beta testers use most.</p>
+  </div>
+
+  <div class="compat reveal">
+    <div class="compat-row"><span>Platforms</span><div class="line"></div></div>
+
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.7 0.18 230);">◆</div>
+      <div class="nm">TradingView</div>
+      <div class="sub">Web & desktop</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.75 0.18 40);">N</div>
+      <div class="nm">NinjaTrader</div>
+      <div class="sub">Windows · 8</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.72 0.15 160);">S</div>
+      <div class="nm">Sierra Chart</div>
+      <div class="sub">Windows</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.68 0.20 255);">T</div>
+      <div class="nm">Tradovate</div>
+      <div class="sub">Web & desktop</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.78 0.16 80);">Q</div>
+      <div class="nm">Quantower</div>
+      <div class="sub">Windows · macOS</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.70 0.18 300);">M</div>
+      <div class="nm">MotiveWave</div>
+      <div class="sub">Desktop</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.62 0.20 25);">J</div>
+      <div class="nm">Jigsaw</div>
+      <div class="sub">Order flow</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.66 0.18 150);">P</div>
+      <div class="nm">ProjectX</div>
+      <div class="sub">Prop · funded</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.72 0.14 210);">W</div>
+      <div class="nm">WealthChart</div>
+      <div class="sub">Desktop</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+    <div class="compat-item">
+      <div class="logo-glyph" style="color: oklch(0.68 0.17 280);">TS</div>
+      <div class="nm">TradeStation</div>
+      <div class="sub">Windows · Web</div>
+      <div class="ok"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5l1.5 1.5L6.5 2"/></svg></div>
+    </div>
+
+    <div class="compat-row" style="margin-top: 24px;"><span>Instruments</span><div class="line"></div></div>
+
+    <div class="compat-item"><div class="logo-glyph" style="color: oklch(0.68 0.18 255);">NQ</div><div class="nm">Nasdaq futures</div><div class="sub">E-mini + micro</div></div>
+    <div class="compat-item"><div class="logo-glyph" style="color: oklch(0.68 0.18 255);">ES</div><div class="nm">S&P 500 futures</div><div class="sub">E-mini + micro</div></div>
+    <div class="compat-item"><div class="logo-glyph" style="color: oklch(0.72 0.14 160);">QQQ</div><div class="nm">Invesco QQQ</div><div class="sub">ETF · equity</div></div>
+    <div class="compat-item"><div class="logo-glyph" style="color: oklch(0.78 0.16 80);">GC</div><div class="nm">Gold futures</div><div class="sub">COMEX</div></div>
+    <div class="compat-item"><div class="logo-glyph" style="color: oklch(0.72 0.14 210);">SPX</div><div class="nm">S&P 500 index</div><div class="sub">Cash index</div></div>
+
+    <div class="compat-item"><div class="logo-glyph">RTY</div><div class="nm">Russell 2000</div><div class="sub">Futures</div></div>
+    <div class="compat-item"><div class="logo-glyph">CL</div><div class="nm">Crude oil</div><div class="sub">NYMEX</div></div>
+    <div class="compat-item"><div class="logo-glyph">6E</div><div class="nm">Euro FX</div><div class="sub">Forex futures</div></div>
+    <div class="compat-item"><div class="logo-glyph">BTC</div><div class="nm">Bitcoin</div><div class="sub">Spot + futures</div></div>
+    <div class="compat-item"><div class="logo-glyph">∞</div><div class="nm">Anything</div><div class="sub">If it's on screen</div></div>
+  </div>
+</section>
+
+<!-- ── Use cases ── -->
+<section class="sec" id="usecases">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">Why traders use it</span>
+    <h2>Four workflows. One keyboard shortcut away.</h2>
+  </div>
+
+  <div class="usecases reveal">
+    <div class="uc">
+      <span class="tag">Journal</span>
+      <h4>Stop explaining trades in words.</h4>
+      <p>A 45-second clip of the actual bar-by-bar print is worth ten paragraphs in your trade journal. Drop it in Notion or Edgewonk and move on.</p>
+      <div class="demo">
+        <div style="position: absolute; inset: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div style="background: oklch(0.13 0.008 260); border-radius: 4px; display: grid; place-items: center; color: var(--fg-faint); font-size: 10px;">▶ 00:32</div>
+          <div style="background: oklch(0.13 0.008 260); border-radius: 4px; display: grid; place-items: center; color: var(--fg-faint); font-size: 10px;">▶ 00:58</div>
+          <div style="background: oklch(0.13 0.008 260); border-radius: 4px; display: grid; place-items: center; color: var(--fg-faint); font-size: 10px;">▶ 00:18</div>
+          <div style="background: oklch(0.13 0.008 260); border-radius: 4px; display: grid; place-items: center; color: var(--fg-faint); font-size: 10px;">▶ 01:02</div>
+        </div>
+      </div>
+    </div>
+    <div class="uc">
+      <span class="tag">Coach</span>
+      <h4>Show your mentor exactly what you saw.</h4>
+      <p>Trade review over Discord or Zoom. Paste a clip, get notes back. Better than chart screenshots — they can see the build-up.</p>
+      <div class="demo">
+        <div style="position: absolute; inset: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="background: oklch(0.13 0.008 260); border-radius: 12px; padding: 8px 12px; color: var(--fg-mute); font-size: 11px; align-self: flex-start; max-width: 70%;">Clip attached — see the 9:31 entry</div>
+          <div style="background: oklch(0.55 0.20 255); border-radius: 12px; padding: 8px 12px; color: #fff; font-size: 11px; align-self: flex-end; max-width: 70%;">Too early. Watch the retest at 0:34.</div>
+        </div>
+      </div>
+    </div>
+    <div class="uc">
+      <span class="tag">Dispute</span>
+      <h4>Proof when the fill was wrong.</h4>
+      <p>When your DOM shows one thing and your broker says another, a clip of the ladder at the exact millisecond is not a debate.</p>
+      <div class="demo">
+        <div style="position: absolute; inset: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--mono); font-size: 10px;">
+          <div style="display: flex; justify-content: space-between; color: var(--fg-faint);"><span>5248.50</span><span>120</span></div>
+          <div style="display: flex; justify-content: space-between; color: oklch(0.68 0.15 155); font-weight: 600;"><span>5248.75</span><span>86 ▶</span></div>
+          <div style="display: flex; justify-content: space-between; color: var(--fg-faint);"><span>5249.00</span><span>212</span></div>
+          <div style="display: flex; justify-content: space-between; color: var(--fg-faint);"><span>5249.25</span><span>158</span></div>
+          <div style="margin-top: 4px; color: var(--alert); font-size: 9px; font-weight: 700;">FILL @ 5249.00 · DISPUTED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Buffer feature ── -->
+<section class="sec" id="buffer">
+  <div class="feature-2col reveal">
+    <div>
+      <span class="eyebrow">The rolling buffer</span>
+      <h2 style="margin:12px 0 16px; font-size: 52px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.02;">
+        Always on.<br/>Never on disk.<br/>Until you say so.
+      </h2>
+      <p style="color: var(--fg-mute); font-size: 17px; line-height: 1.55; margin: 0 0 24px;">
+        ClipCatch keeps the last 60 seconds of your screen in memory — not files.
+        Storage stays clean. CPU stays cool.
+        And "wait, did anyone get that?" becomes: you did.
+      </p>
+      <ul style="list-style:none; padding: 0; margin: 0; display:flex; flex-direction:column; gap: 10px;">
+        <li style="display:grid; grid-template-columns: 18px 1fr; gap: 12px; color: var(--fg-mute); font-size: 14.5px; line-height: 1.55;">
+          <svg class="i" style="color: var(--match); margin-top:3px" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>
+          <span>In-memory ring buffer. No ghost files in your Movies folder.</span>
+        </li>
+        <li style="display:grid; grid-template-columns: 18px 1fr; gap: 12px; color: var(--fg-mute); font-size: 14.5px; line-height: 1.55;">
+          <svg class="i" style="color: var(--match); margin-top:3px" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>
+          <span>Save backwards — capture the move you already watched.</span>
+        </li>
+        <li style="display:grid; grid-template-columns: 18px 1fr; gap: 12px; color: var(--fg-mute); font-size: 14.5px; line-height: 1.55;">
+          <svg class="i" style="color: var(--match); margin-top:3px" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>
+          <span>Under 3% CPU at 4K · runs silent next to your chart software.</span>
+        </li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <div class="buf-marker">
+        <span class="n">60s</span>
+        <span class="l">Rolling buffer</span>
+      </div>
+      <div class="buf-timeline" id="buf-bars"></div>
+      <div class="buf-labels">
+        <span>-60s</span>
+        <span>-45s</span>
+        <span>-30s</span>
+        <span>-15s</span>
+        <span style="color: var(--rec);">now</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+        <div style="font-size: 12px; color: var(--fg-faint);">Click <b style="color: var(--fg);">Save 60s</b> to save what you just watched.</div>
+        <button class="btn-rec" style="height: 32px; padding: 0 12px; font-size: 12px; border-radius: 8px;">
+          <span class="pulse"><span class="sq" style="width:6px;height:6px;"></span></span>
+          Save now
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ── -->
+<section class="sec">
+  <div class="stats reveal">
+    <div class="stat"><span class="n">&lt;3<small>%</small></span><span class="l">CPU at 4K · 60fps · Apple Silicon</span></div>
+    <div class="stat"><span class="n">84<small>MB</small></span><span class="l">RAM · with full 3-minute buffer</span></div>
+    <div class="stat"><span class="n">0<small>ms</small></span><span class="l">Delay from Save → clip on disk</span></div>
+    <div class="stat"><span class="n">∞</span><span class="l">Clips · free · always</span></div>
+  </div>
+</section>
+
+<!-- ── Traders quotes ── -->
+<section class="sec" id="quotes">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">Used in the trenches</span>
+    <h2>Quiet app. Loud endorsements.</h2>
+  </div>
+
+  <div class="quotes reveal">
+    <div class="q big">
+      <blockquote>"I've screenshotted ten thousand charts. Every single one was the wrong moment. This is the first tool that catches the <em>actual</em> print."</blockquote>
+      <div class="who">
+        <div class="av">MK</div>
+        <div><div class="nm">Mika K.</div><div class="meta">ES · funded · 6Y</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"Set the area over my P&L, let it auto-record. I have a library of every stop-out I ever took. Ugly, but it made me a better trader."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.68 0.15 155), oklch(0.42 0.18 175));">DR</div>
+        <div><div class="nm">Daniel R.</div><div class="meta">NQ · prop</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"Replaced OBS, Loom, and QuickTime on my rig. Laptop fan finally shuts up."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.17 75), oklch(0.55 0.18 45));">JT</div>
+        <div><div class="nm">Jamal T.</div><div class="meta">SPX · discretionary</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ── -->
+<section class="sec" id="pricing">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">Pricing</span>
+    <h2>Free. Forever. Really.</h2>
+    <p>Built by traders who got tired of paying $9/mo to record their own screen. One price, one app, every feature.</p>
+  </div>
+
+  <div class="pricing-solo reveal">
+    <span class="tag">● Always free</span>
+    <h3>ClipCatch</h3>
+    <div class="free">$0</div>
+    <div class="note">No account. No trial. No card. Just download.</div>
+    <ul>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Unlimited clips, unlimited length</li>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>4K60 · H.264 · HEVC · ProRes</li>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Rolling buffer up to 3 minutes</li>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Area monitor · auto-record on change</li>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Every platform, every instrument</li>
+      <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>No telemetry · nothing leaves your machine</li>
+    </ul>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button class="btn-rec" style="height: 44px; padding: 0 18px; font-size: 13.5px; border-radius: 10px;">
+        <span class="pulse"><span class="circ"></span></span>
+        Download for Mac
+      </button>
+      <button class="btn" style="height: 44px; padding: 0 18px; font-size: 13.5px; border-radius: 10px;">
+        Download for Windows
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="sec" id="faq">
+  <div class="sec-head center reveal">
+    <span class="eyebrow">FAQ</span>
+    <h2>Answers.</h2>
+  </div>
+  <div class="faq reveal">
+    <div class="faq-item"><h6>Why is it free?</h6><p>Because charging traders to record their own screens is absurd. We use ClipCatch every session — we'd rather hear from more of you than bill you.</p></div>
+    <div class="faq-item"><h6>Will it ever cost money?</h6><p>The core recorder — buffer, save, area monitor — stays free forever. If we ever add cloud sync or team features, those would be paid. The app in front of you, on your machine, is yours.</p></div>
+    <div class="faq-item"><h6>Does it send data anywhere?</h6><p>No telemetry. No analytics. No crash reporting. No account. We don't know you installed it and that's how we like it.</p></div>
+    <div class="faq-item"><h6>Windows version?</h6><p>Yes. Same app. Same buffer engine. Same price.</p></div>
+    <div class="faq-item"><h6>Does it work with my prop firm's platform?</h6><p>If the platform renders on your screen, ClipCatch records it. That includes every firm-specific build of NinjaTrader, Tradovate, Rithmic, ProjectX, and so on.</p></div>
+    <div class="faq-item"><h6>What about audio — market-maker squawks, mentor calls?</h6><p>Yes. Record system audio and mic alongside the screen. Off by default.</p></div>
+  </div>
+</section>
+
+<!-- ── Footer CTA ── -->
+<section class="sec">
+  <div class="footer-cta reveal">
+    <span class="brand-mark lg" style="margin: 0 auto 24px; display:block;"></span>
+    <h2>Catch your next setup.</h2>
+    <p>Free download. No account. 84 MB. Under a minute to install.</p>
+    <div class="hero-cta">
+      <button class="btn-rec btn-xl">
+        <span class="pulse"><span class="circ"></span></span>
+        Download for Mac
+      </button>
+      <button class="btn btn-xl">
+        <svg class="i" viewBox="0 0 20 20" style="width:16px;height:16px"><path d="M3 3h7v7H3zM10 3h7v7h-7zM3 10h7v7H3zM10 10h7v7h-7z" fill="currentColor" stroke="none"/></svg>
+        Download for Windows
+      </button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <a href="#top" class="brand"><span class="brand-mark sm"></span>ClipCatch</a>
+    <span>© 2026 · Built by traders.</span>
+    <span style="margin-left:auto; display:flex; gap: 18px;">
+      <a href="traders.html">For traders</a>
+      <a href="#how">How it works</a>
+      <a href="#compat">Platforms</a>
+      <a href="#pricing">Pricing</a>
+    </span>
+  </div>
+</footer>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   Ticker tape
+   ───────────────────────────────────────────── */
+(function(){
+  const t = document.getElementById('tickerTrack');
+  const items = [
+    ['ES', '5 248.75', '+0.35%', 'up'],
+    ['NQ', '18 942.00', '+0.62%', 'up'],
+    ['YM', '39 284.50', '+0.11%', 'up'],
+    ['RTY', '2 108.40', '-0.28%', 'down'],
+    ['SPX', '5 246.11', '+0.35%', 'up'],
+    ['QQQ', '461.82', '+0.58%', 'up'],
+    ['GC', '2 412.30', '+0.72%', 'up'],
+    ['CL', '82.14', '-1.24%', 'down'],
+    ['6E', '1.0824', '+0.04%', 'up'],
+    ['BTC', '69 482', '-0.54%', 'down'],
+    ['ETH', '3 712.14', '+1.22%', 'up'],
+    ['DXY', '104.82', '-0.08%', 'down'],
+  ];
+  const row = items.map(([s,p,c,d]) =>
+    `<span class="tick"><span class="sym">${s}</span><span class="px">${p}</span><span class="${d}">${c}</span><span class="dot"></span></span>`
+  ).join('');
+  t.innerHTML = row + row;
+})();
+
+/* ─────────────────────────────────────────────
+   Trading chart — candles + EMA
+   ───────────────────────────────────────────── */
+(function(){
+  const container = document.getElementById('candles');
+  if (!container) return;
+  const N = 60;
+  // Generate a realistic candle series ending at ~5248.75
+  let price = 5210;
+  const bars = [];
+  for (let i = 0; i < N; i++) {
+    const drift = (i < 15 ? 0.05 : i < 30 ? -0.2 : i < 45 ? 0.3 : 0.6);
+    const vol = 2.2 + Math.random() * 2;
+    const open = price;
+    const move = drift + (Math.random() - 0.5) * vol;
+    const close = open + move;
+    const high = Math.max(open, close) + Math.random() * 1.8;
+    const low  = Math.min(open, close) - Math.random() * 1.8;
+    bars.push({open, high, low, close});
+    price = close;
+  }
+  // Normalize to 5248.75 on the last close
+  const adjust = 5248.75 - bars[bars.length - 1].close;
+  bars.forEach(b => { b.open+=adjust; b.close+=adjust; b.high+=adjust; b.low+=adjust; });
+  const highs = bars.map(b => b.high), lows = bars.map(b => b.low);
+  const hi = Math.max(...highs), lo = Math.min(...lows);
+  const range = hi - lo;
+  const pad = range * 0.08;
+  const top = hi + pad, bot = lo - pad;
+
+  // Render candles
+  const frag = document.createDocumentFragment();
+  bars.forEach((b, i) => {
+    const div = document.createElement('div');
+    const isUp = b.close >= b.open;
+    const isLast = i === bars.length - 1;
+    div.className = 'cd ' + (isLast ? 'live' : (isUp ? 'up' : 'dn'));
+    const bodyTop = 100 - ((Math.max(b.open, b.close) - bot) / (top - bot)) * 100;
+    const bodyBot = 100 - ((Math.min(b.open, b.close) - bot) / (top - bot)) * 100;
+    const wickTop = 100 - ((b.high - bot) / (top - bot)) * 100;
+    const wickBot = 100 - ((b.low - bot) / (top - bot)) * 100;
+    div.innerHTML =
+      `<div class="wick" style="top:${wickTop}%; height:${wickBot - wickTop}%;"></div>` +
+      `<div class="body" style="top:${bodyTop}%; height:${Math.max(0.6, bodyBot - bodyTop)}%;"></div>`;
+    frag.appendChild(div);
+  });
+  container.appendChild(frag);
+
+  // EMA path
+  const ema = [];
+  const k = 2 / (21 + 1);
+  bars.forEach((b, i) => {
+    if (i === 0) ema.push(b.close);
+    else ema.push(b.close * k + ema[i-1] * (1 - k));
+  });
+  const svg = document.getElementById('emaSvg');
+  const path = svg.querySelector('path');
+  const d = ema.map((v, i) => {
+    const x = (i + 0.5) / N * 100;
+    const y = 100 - ((v - bot) / (top - bot)) * 100;
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+  path.setAttribute('d', d);
+
+  // Position "live" tag on the axis at the last close
+  const live = document.getElementById('livePrice');
+  if (live) {
+    const y = 100 - ((bars[bars.length-1].close - bot) / (top - bot)) * 100;
+    live.style.top = `calc(${y.toFixed(1)}% - 9px)`;
+  }
+
+  // Volume bars in foot
+  const vb = document.getElementById('volBars');
+  if (vb) {
+    const vf = document.createDocumentFragment();
+    bars.forEach((b) => {
+      const v = document.createElement('div');
+      v.className = b.close >= b.open ? 'up' : 'dn';
+      v.style.height = (18 + Math.random()*78) + '%';
+      vf.appendChild(v);
+    });
+    vb.appendChild(vf);
+  }
+
+  // Live tick animation on the last candle: gentle close drift
+  let tickPrice = bars[bars.length-1].close;
+  const priceEl = document.getElementById('chartPrice');
+  const chgEl = document.getElementById('chartChg');
+  const liveEl = document.getElementById('livePrice');
+  setInterval(() => {
+    tickPrice += (Math.random() - 0.48) * 0.35;
+    if (priceEl) priceEl.textContent = tickPrice.toFixed(2).replace('.', '.');
+    const chg = tickPrice - 5230.50;
+    const pct = (chg / 5230.50 * 100).toFixed(2);
+    if (chgEl) {
+      chgEl.textContent = (chg >= 0 ? '+ ' : '- ') + Math.abs(chg).toFixed(2) + ' · ' + (chg >= 0 ? '+' : '') + pct + '%';
+      chgEl.style.color = chg >= 0 ? 'var(--match)' : 'oklch(0.65 0.22 25)';
+    }
+    if (liveEl) liveEl.textContent = tickPrice.toFixed(2);
+  }, 800);
+})();
+
+/* ─────────────────────────────────────────────
+   Buffer bars
+   ───────────────────────────────────────────── */
+(function(){
+  const w = document.getElementById('buf-bars');
+  if (!w) return;
+  const N = 60;
+  for (let i = 0; i < N; i++) {
+    const t = document.createElement('div');
+    t.className = 't' + (i > N - 8 ? ' recent' : '') + (i === N - 1 ? ' live' : '');
+    t.style.setProperty('--i', i);
+    t.style.height = (25 + Math.sin(i / 3) * 30 + Math.random() * 40) + '%';
+    w.appendChild(t);
+  }
+})();
+
+/* ─────────────────────────────────────────────
+   Scroll-reveal
+   ───────────────────────────────────────────── */
+(function(){
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>
