@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0f1838" />
+<title>Privacy policy — ClipCatch</title>
+<meta name="description" content="How ClipCatch handles your data. Short version: recordings stay on your Mac." />
+<link rel="stylesheet" href="app/tokens.css"/>
+<link rel="icon" type="image/svg+xml" href="app/favicon.svg"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=6"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=6"/>
+<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=6"/>
+<link rel="shortcut icon" href="/favicon.ico?v=6"/>
+<link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png?v=6"/>
+<style>
+  body { color: var(--fg); font-family: var(--sans); }
+  .legal-wrap { max-width: 760px; margin: 0 auto; padding: 80px 28px 120px; }
+  .legal-back { font-size: 13px; color: var(--fg-mute); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 40px; }
+  .legal-back:hover { color: var(--fg); }
+  .legal-eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-faint); font-weight: 600; }
+  .legal-wrap h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 600; letter-spacing: -0.03em; margin: 14px 0 32px; line-height: 1.05; }
+  .legal-wrap h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin: 40px 0 14px; color: var(--fg); }
+  .legal-wrap p, .legal-wrap li { font-size: 15px; line-height: 1.7; color: var(--fg-mute); }
+  .legal-wrap p { margin: 0 0 16px; }
+  .legal-wrap ul { margin: 0 0 16px; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+  .legal-wrap a { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: oklch(1 0 0 / 0.25); transition: text-decoration-color 0.15s ease; }
+  .legal-wrap a:hover { text-decoration-color: var(--fg); }
+  .legal-meta { margin-top: 60px; padding-top: 28px; border-top: 0.5px solid var(--line); font-size: 12px; color: var(--fg-faint); }
+  .legal-card { padding: 22px 24px; background: var(--bg-card); border: 0.5px solid var(--line); border-radius: 16px; margin: 24px 0; }
+  .legal-card p:last-child { margin-bottom: 0; }
+  .legal-card.tldr { background: linear-gradient(135deg, oklch(0.30 0.18 263 / 0.45), oklch(0.22 0.10 263 / 0.55)); border-color: oklch(0.62 0.22 258 / 0.30); }
+  .legal-card.tldr strong { color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="legal-wrap">
+  <a href="index.html" class="legal-back">← Back to ClipCatch</a>
+  <span class="legal-eyebrow">Legal</span>
+  <h1>Privacy policy</h1>
+
+  <div class="legal-card tldr">
+    <p><strong>The short version.</strong> ClipCatch records your screen <em>locally on your Mac</em>. Your recordings never leave your computer unless you choose to share them. We don't have a server that sees your video.</p>
+  </div>
+
+  <h2>What ClipCatch records</h2>
+  <p>The app captures the last 60 seconds of your screen (and optionally microphone input) into a rolling buffer in memory. When you press the save hotkey, that buffer is written to a video file on your local disk in the folder you selected. Nothing is uploaded.</p>
+
+  <h2>Data we receive</h2>
+  <ul>
+    <li><strong>License activation.</strong> When you enter a license key, the app sends the key to <a href="https://polar.sh" target="_blank" rel="noopener">Polar.sh</a> to verify and activate it. Polar receives the key, your machine identifier, and basic activation metadata.</li>
+    <li><strong>Checkout.</strong> When you purchase, payment is processed by Polar.sh and their payment partners. We never see card details.</li>
+    <li><strong>Support email.</strong> If you email <a href="mailto:support@clipcatch.app">support@clipcatch.app</a>, your email and message are received and stored in our inbox.</li>
+    <li><strong>Website visits.</strong> The site is hosted on Netlify, which receives standard server logs (IP address, user-agent, timestamp). We do not run any third-party analytics or advertising trackers.</li>
+  </ul>
+
+  <h2>What we do <em>not</em> collect</h2>
+  <ul>
+    <li>We do not upload, store, or analyze your recordings.</li>
+    <li>We do not collect telemetry from the app about what you record.</li>
+    <li>We do not sell, rent, or share your data with advertisers.</li>
+  </ul>
+
+  <h2>Sub-processors</h2>
+  <ul>
+    <li><strong>Polar.sh</strong> — payments, licensing, downloads (<a href="https://polar.sh/legal/privacy" target="_blank" rel="noopener">privacy policy</a>).</li>
+    <li><strong>Netlify</strong> — website hosting and DNS (<a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">privacy policy</a>).</li>
+    <li><strong>ImprovMX + Google</strong> — email forwarding and the <em>support@</em> mailbox.</li>
+  </ul>
+
+  <h2>Your rights</h2>
+  <p>If you're in the EU/UK, you have rights under GDPR including access, correction, deletion, and portability. To exercise any of them, email <a href="mailto:support@clipcatch.app">support@clipcatch.app</a> and we'll respond within 30 days.</p>
+
+  <h2>Contact</h2>
+  <p>Privacy questions: <a href="mailto:support@clipcatch.app">support@clipcatch.app</a></p>
+
+  <p class="legal-meta">Last updated: April 2026</p>
+</div>
+</body>
+</html>

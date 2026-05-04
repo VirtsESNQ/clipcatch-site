@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="ClipCatch" />
-<title>ClipCatch — Never miss the setup again.</title>
-<meta name="description" content="ClipCatch keeps the last sixty seconds of your screen always ready to save. Hit the hotkey, get the move on disk." />
+<title>ClipCatch — the bag got caught.</title>
+<meta name="description" content="A 60-second rolling buffer for your screen. Hit the hotkey AFTER the move and the clip is on disk before you say 'bro tell me you got that.'" />
 <link rel="stylesheet" href="app/tokens.css"/>
 <!-- Favicons. Safari is finicky about non-root paths and ignores ?v=
      cachebusters once an icon's been resolved, so we serve the icons
@@ -27,6 +27,23 @@
 <!-- Preload the showcase screenshot so it starts streaming during the
      boot loader, never showing a half-loaded grey rectangle. -->
 <link rel="preload" as="image" href="assets/screen-recorder.png" fetchpriority="high"/>
+<!-- Instrument Serif — italic display face for the cyan accent words. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+/* Accent face for <em>'d words. Lives globally so every section that
+   highlights a phrase in cyan automatically picks it up. The italic
+   pairs with Inter's geometric sans for clear typographic contrast
+   without leaving the navy/cyan brand world. */
+em, .accent-serif {
+  font-family: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+h1 em, h2 em, h3 em { letter-spacing: -0.5px; }
+</style>
 <style>
 /* ───────────────────────────────────────────────────────────────────
    Page-specific layout — uses tokens from /app/tokens.css.
@@ -1342,8 +1359,8 @@ html.is-ready body > *:not(#boot) {
 
 <!-- ── Trial banner ───────────────────────────────────────────── -->
 <div class="trial-banner">
-  <b>3 days free</b> — every feature unlocked, no card
-  <a href="#download">Start trial →</a>
+  <b>3 days free</b> — every feature unlocked. No card. Buy lifetime if it fits — or don't.
+  <a href="#pricing">See pricing →</a>
 </div>
 
 <!-- ── Nav ───────────────────────────────────────────────────── -->
@@ -1378,31 +1395,33 @@ html.is-ready body > *:not(#boot) {
 
   <div class="copy">
     <div class="eyebrow">
-      <span class="pill">FREE 3 DAYS</span>
-      <span class="tail">Every feature unlocked. No card.</span>
+      <span class="pill">v2.0</span>
+      <span class="tail">A 60-second rolling buffer for your screen.</span>
     </div>
-    <h1>Never miss<br/>the <em>setup</em> again.</h1>
+    <h1>The bag got<br/><em>caught</em>.</h1>
     <p class="hero-sub">
-      ClipCatch keeps the last sixty seconds of your chart always ready to save.
-      You saw the tape rip — hit <b style="color:var(--fg);">save</b> and the move is on disk.
-      One app, every platform you trade on.
+      You saw the candle rip. You blinked. It was gone. ClipCatch keeps the last
+      <b style="color:var(--fg);">60 seconds</b> of your screen waiting in RAM —
+      hit the hotkey <em>after</em> the move and the clip is on disk before you say
+      <em>"bro tell me you got that."</em>
+      Or <b style="color:var(--fg);">don't hit anything</b> — point Area Monitor at your
+      newest candle and ClipCatch <em>starts and stops on its own</em> the moment the price moves.
     </p>
     <div class="hero-cta">
       <a href="#download" style="text-decoration:none;">
         <button class="btn-rec btn-xl">
           <span class="pulse"><span class="circ"></span></span>
-          Download for Mac
+          Start 3-day free trial
         </button>
       </a>
-      <a href="#pricing" style="text-decoration:none;">
-        <button class="btn btn-xl">See pricing</button>
+      <a href="#how" style="text-decoration:none;">
+        <button class="btn btn-xl">See how it works</button>
       </a>
     </div>
     <div class="hero-meta">
-      <span><b>macOS 13+</b></span>
-      <span><b>Apple Silicon &amp; Intel</b></span>
-      <span><b>2.7 MB download</b></span>
-      <span><b>3-day free trial</b></span>
+      <span><b>macOS 13+ &amp; Win 10/11</b></span>
+      <span><b>2 MB · zero telemetry</b></span>
+      <span><b>&lt;3% CPU at 4K · 60</b></span>
     </div>
   </div>
 
@@ -1427,19 +1446,19 @@ html.is-ready body > *:not(#boot) {
 <!-- ── Stat bar ──────────────────────────────────────────────── -->
 <section class="tight">
   <div class="statbar reveal">
-    <div class="stat"><span class="n">&lt;3<small>%</small></span><span class="l">CPU at 4K · 60 fps</span></div>
-    <div class="stat"><span class="n">84<small>MB</small></span><span class="l">RAM with full buffer</span></div>
-    <div class="stat"><span class="n">0<small>ms</small></span><span class="l">Save → clip on disk</span></div>
-    <div class="stat"><span class="n">∞</span><span class="l">Clips · unlimited</span></div>
+    <div class="stat"><span class="n">60<small>s</small></span><span class="l">Rolling buffer</span></div>
+    <div class="stat"><span class="n">&lt;3<small>%</small></span><span class="l">CPU at 4K · 60</span></div>
+    <div class="stat"><span class="n">0</span><span class="l">Telemetry pings</span></div>
+    <div class="stat"><span class="n">∞</span><span class="l">Clips per session</span></div>
   </div>
 </section>
 
 <!-- ── Showcase / app screenshot ─────────────────────────────── -->
 <section class="tight" id="showcase">
   <div class="sec-head reveal">
-    <span class="eyebrow">The app, on day one</span>
-    <h2>Three tabs. Built for one thing.</h2>
-    <p>Recorder, Clips, Settings. No menus to dig through, no project files, no exports. Hit the hotkey, the clip is on disk.</p>
+    <span class="eyebrow">ClipCatch for macOS · v2.0 · Native Apple Silicon</span>
+    <h2>Three tabs. <em>Built for one thing.</em></h2>
+    <p>Recorder, Clips, Journal. No menus to dig through, no project files, no exports. Hit the hotkey, the clip is on disk.</p>
   </div>
 
   <div class="showcase-frame reveal">
@@ -1456,15 +1475,15 @@ html.is-ready body > *:not(#boot) {
 <section id="how">
   <div class="sec-head reveal">
     <span class="eyebrow">How it works</span>
-    <h2>Three things. That's the whole app.</h2>
-    <p>No tutorial. No onboarding. Open it, pick what to record, trade.</p>
+    <h2>Three things. <em>That's the app.</em></h2>
+    <p>No tutorials, no AI tour, no email walls. Open it, point at your chart, get back to trading.</p>
   </div>
 
   <div class="pillars reveal">
     <div class="pillar">
-      <span class="num">01 · BACKGROUND</span>
-      <h5>It's quietly recording your chart.</h5>
-      <p>The last 60 seconds (or 3 min) live in RAM. Nothing on disk. Under 3% CPU on Apple Silicon. You forget it's there.</p>
+      <span class="num">01 · ALWAYS ROLLING</span>
+      <h5>It's quietly recording your screen — into RAM.</h5>
+      <p>Sixty seconds (configurable up to 3 min) live in memory. Nothing on disk. You forget it's there. Your SSD stays clean.</p>
       <div class="visual">
         <div style="position:absolute; inset:18px; display:flex; align-items:flex-end; gap:3px;">
           <div style="height:35%; flex:1; background:oklch(0.30 0.10 258); border-radius:1px;"></div>
@@ -1477,9 +1496,9 @@ html.is-ready body > *:not(#boot) {
       </div>
     </div>
     <div class="pillar">
-      <span class="num">02 · THE MOMENT</span>
-      <h5>The move prints. You save.</h5>
-      <p>Hit <b style="color:var(--fg);">Save 60s</b> — or let the Area Monitor auto-save when the newest candle moves hard. The clip is already rendered.</p>
+      <span class="num">02 · HANDS OFF</span>
+      <h5>It saves <em>itself</em>.</h5>
+      <p>Drag a box around your latest candle. The instant the pixels inside change, ClipCatch starts recording — and stops a few seconds after they settle. You don't touch the keyboard. You don't see a button. You just trade.</p>
       <div class="visual">
         <div style="position:absolute; inset:0; display:grid; place-items:center;">
           <div style="display:flex; gap:10px; align-items:center; padding:10px 16px; border-radius:10px; background:oklch(0.10 0.04 258); box-shadow: inset 0 0 0 0.5px var(--line), 0 0 0 3px var(--cyan-soft);">
@@ -1492,9 +1511,9 @@ html.is-ready body > *:not(#boot) {
       </div>
     </div>
     <div class="pillar">
-      <span class="num">03 · KEEP TRADING</span>
-      <h5>Clip is on disk. Review at the close.</h5>
-      <p>MP4, H.264, named with the ticker and time. Open with anything. Drop in Notion, Discord, Journalytix — wherever your journal lives.</p>
+      <span class="num">03 · DROP &amp; GO</span>
+      <h5>Clip on disk. Named with the ticker.</h5>
+      <p>MP4, H.264 or ProRes, ready for Notion, Discord, your eval firm, your group chat. Keep trading — you didn't miss it.</p>
       <div class="visual">
         <div style="position:absolute; inset:14px; display:flex; flex-direction:column; gap:6px;">
           <div style="display:flex; gap:8px; align-items:center; padding:7px 10px; border-radius:6px; background:oklch(0.10 0.04 258); box-shadow: inset 0 0 0 0.5px var(--line);">
@@ -1517,17 +1536,17 @@ html.is-ready body > *:not(#boot) {
 <section id="features">
   <div class="feature reveal">
     <div class="copy">
-      <span class="eyebrow">The rolling buffer</span>
-      <h3>Always on.<br/>Never on disk.<br/>Until you say <em>so</em>.</h3>
+      <span class="eyebrow">The rewind</span>
+      <h3>You press save<br/><em>after</em> the move.</h3>
       <p>
-        ClipCatch keeps the last 60 seconds of your screen in memory — not files.
-        Storage stays clean. CPU stays cool.
-        And "wait, did anyone get that?" becomes: you did.
+        OBS makes you predict the future. ClipCatch lets you record the past.
+        The buffer rolls in memory — disk only sees the bytes you actually want.
       </p>
       <ul>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>In-memory ring buffer. No ghost files in your Movies folder.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Save backwards — capture the move you already watched.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Under 3% CPU at 4K · runs silent next to your chart software.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span><b style="color:var(--fg);">0 bytes on disk</b> until you hit save.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span><b style="color:var(--fg);">Hardware-accel encode</b> — VideoToolbox / NVENC.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span><b style="color:var(--fg);">Area Monitor</b> auto-saves when your latest bar moves &gt; threshold.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span><b style="color:var(--fg);">720p · 1080p · 1440p · 4K · Native</b> — pick once, forget.</span></li>
       </ul>
     </div>
     <div class="feat-visual">
@@ -1544,17 +1563,19 @@ html.is-ready body > *:not(#boot) {
 <section>
   <div class="feature flip reveal">
     <div class="copy">
-      <span class="eyebrow">Area monitor</span>
-      <h3>Draw a box.<br/>Walk away.<br/><em>Records itself.</em></h3>
+      <span class="eyebrow">Area monitor — the killer feature</span>
+      <h3>You stop pressing buttons.<br/>It <em>records itself.</em></h3>
       <p>
-        Drag a rectangle over your P&amp;L tile, your boss bar, your fill notification.
-        ClipCatch watches the pixels. The instant they change, it's recording — no key,
-        no click, no missed move.
+        Drag a rectangle around your latest candle once. From that point on
+        ClipCatch <b style="color:var(--fg);">starts</b> the recording the instant the pixels move,
+        <b style="color:var(--fg);">stops</b> it when they settle, and writes the 60 seconds
+        leading up to it to disk. You watch the chart. The app handles the keyboard.
       </p>
       <ul>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Three sensitivity levels — quiet markets to fast tape.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Auto-stops a few seconds after the region settles.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Works against any platform's UI — Tradovate, NinjaTrader, TradingView.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Auto-starts on motion, auto-stops on calm — zero hotkeys.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Three sensitivity levels — quiet RTH to overnight crypto.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Works against any platform's UI — Tradovate, NinjaTrader, TradingView, MotiveWave.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Run two area monitors on two charts — one buffer engine, both auto-saving.</span></li>
       </ul>
     </div>
     <div class="feat-visual">
@@ -1576,17 +1597,17 @@ html.is-ready body > *:not(#boot) {
 <section>
   <div class="feature reveal">
     <div class="copy">
-      <span class="eyebrow">Custom region</span>
-      <h3>Like ⌘⇧5 — but it was<br/><em>already recording</em>.</h3>
+      <span class="eyebrow">Save-before</span>
+      <h3>The clip of what<br/>you <em>just watched.</em></h3>
       <p>
-        Pick any rectangle on screen with the picker, the way you'd take a screenshot.
-        ClipCatch captures only that. Sharper output, smaller files, no UI chrome —
-        just the pixels you actually want to keep.
+        You press the button <em>after</em> the candle prints. ClipCatch reaches into RAM,
+        writes the previous minute to disk, keeps recording. Save 30 clips a session
+        without thinking.
       </p>
       <ul>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Pixel-exact crop. Native resolution, no rescaling.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Works with the rolling buffer — region recordings are also retroactive.</span></li>
-        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Save just the chart, just the DOM, just the P&amp;L. Whatever you need.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Market rips through level — <b style="color:var(--fg);">10:42.08</b>.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>You hit ⌘⇧S — <b style="color:var(--fg);">10:42.17</b>.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Clip writes to ~/Movies · still recording.</span></li>
       </ul>
     </div>
     <div class="feat-visual">
@@ -1602,18 +1623,18 @@ html.is-ready body > *:not(#boot) {
 <section>
   <div class="sec-head reveal">
     <span class="eyebrow">Why traders use it</span>
-    <h2>Four workflows.<br/>One keyboard shortcut away.</h2>
+    <h2>Three workflows.<br/>One keyboard shortcut away.</h2>
   </div>
   <div class="usecases reveal">
     <div class="uc">
       <span class="tag">JOURNAL</span>
-      <h4>Stop explaining trades in words.</h4>
-      <p>A 45-second clip of the actual bar-by-bar print is worth ten paragraphs in your trade journal. Drop it in Notion or Edgewonk and move on.</p>
+      <h4>Trade review, on the bar.</h4>
+      <p>A 45-second clip of the actual bar-by-bar print is worth ten paragraphs in your journal. Drop it in Notion or Edgewonk and move on.</p>
     </div>
     <div class="uc">
-      <span class="tag">COACH</span>
-      <h4>Show your mentor exactly what you saw.</h4>
-      <p>Trade review over Discord or Zoom. Paste a clip, get notes back. Better than chart screenshots — they can see the build-up.</p>
+      <span class="tag">EVAL</span>
+      <h4>Eval-ready MP4 in one hotkey.</h4>
+      <p>Funded eval guys finally stop saying "screenshot please." Topstep, Apex, TakeProfit, MFFU, ProjectX — all accept the MP4 with timestamp overlay.</p>
     </div>
     <div class="uc">
       <span class="tag">DISPUTE</span>
@@ -1627,8 +1648,8 @@ html.is-ready body > *:not(#boot) {
 <section id="compat">
   <div class="sec-head reveal">
     <span class="eyebrow">Works with everything</span>
-    <h2>Your platform,<br/>your charts, your way.</h2>
-    <p>ClipCatch records <b style="color:var(--fg);">what's on screen</b> — so it works with every trading platform, period. Here are the ones our beta testers use most.</p>
+    <h2>Your platform.<br/><em>Your charts.</em> Your way.</h2>
+    <p>ClipCatch records <b style="color:var(--fg);">what's on screen</b> — so it works with every trading platform, period. The list isn't exhaustive, just our beta testers' top picks.</p>
   </div>
 
   <div class="compat reveal">
@@ -1698,51 +1719,51 @@ html.is-ready body > *:not(#boot) {
 <!-- ── Quotes ──────────────────────────────────────────────── -->
 <section>
   <div class="sec-head reveal">
-    <span class="eyebrow">Used in the trenches</span>
-    <h2>Quiet app. Loud endorsements.</h2>
+    <span class="eyebrow">From the group chat</span>
+    <h2>The <em>tape doesn't lie.</em><br/>Neither do they.</h2>
   </div>
 
   <div class="quotes reveal">
     <div class="q big">
-      <blockquote>"I've screenshotted ten thousand charts. Every single one was the wrong moment. This is the first tool that catches the <em>actual</em> print."</blockquote>
+      <blockquote>"Hit the hotkey 3 seconds after a 12-tick fade. Caught the whole reversal. My funded eval guys finally stopped saying 'screenshot please.'"</blockquote>
       <div class="who">
-        <div class="av">MK</div>
-        <div><div class="nm">Mika K.</div><div class="meta">ES · funded · 6Y</div></div>
+        <div class="av">JM</div>
+        <div><div class="nm">@japesmoney</div><div class="meta">ES · NQ · 6 figs funded</div></div>
       </div>
     </div>
     <div class="q">
-      <blockquote>"Set the area over my P&amp;L, let it auto-record. I have a library of every stop-out I ever took. Ugly, but it made me a better trader."</blockquote>
+      <blockquote>"OBS used to fan my MacBook on a Tuesday. ClipCatch sits at 1% CPU and just exists. I forget it's running until I save the clip."</blockquote>
       <div class="who">
-        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.16 155), oklch(0.40 0.18 175));">DR</div>
-        <div><div class="nm">Daniel R.</div><div class="meta">NQ · prop</div></div>
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.16 155), oklch(0.40 0.18 175));">RK</div>
+        <div><div class="nm">Rohan K.</div><div class="meta">Quant dev · ex prop</div></div>
       </div>
     </div>
     <div class="q">
-      <blockquote>"Replaced OBS, Loom, and QuickTime on my rig. Laptop fan finally shuts up."</blockquote>
+      <blockquote>"My trade journal used to be paragraphs. Now it's clips. Way better. I actually re-watch my own trades, which is a feature I didn't know I wanted."</blockquote>
       <div class="who">
-        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 75), oklch(0.55 0.22 45));">JT</div>
-        <div><div class="nm">Jamal T.</div><div class="meta">SPX · discretionary</div></div>
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 75), oklch(0.55 0.22 45));">SL</div>
+        <div><div class="nm">Sara L.</div><div class="meta">CL · GC · NYC</div></div>
       </div>
     </div>
     <div class="q">
-      <blockquote>"My journal used to be screenshots and bad memory. Now it's actual replays of the entry. Game changer for review."</blockquote>
+      <blockquote>"The area monitor caught a midnight wick I would've slept through. Sent it to my Discord squad before they even saw the print. Folks went insane."</blockquote>
       <div class="who">
-        <div class="av" style="background: linear-gradient(135deg, oklch(0.72 0.18 305), oklch(0.48 0.22 285));">SV</div>
-        <div><div class="nm">Sofia V.</div><div class="meta">CL · swing</div></div>
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.72 0.18 305), oklch(0.48 0.22 285));">DV</div>
+        <div><div class="nm">@derivvolt</div><div class="meta">Crypto perps · TikTok 240k</div></div>
       </div>
     </div>
     <div class="q">
-      <blockquote>"Bound the save key to my MX side button. Three weeks in, I've never missed a fill again. Worth ten times the price."</blockquote>
+      <blockquote>"$99 once. No subscription. No 'Pro tier with the actual feature you need.' Refreshing. Bought lifetime in 4 minutes."</blockquote>
       <div class="who">
-        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.18 195), oklch(0.50 0.22 215));">RC</div>
-        <div><div class="nm">Ryan C.</div><div class="meta">CME · scalper</div></div>
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.18 195), oklch(0.50 0.22 215));">TG</div>
+        <div><div class="nm">Tom G.</div><div class="meta">FX · 12-yr screen jockey</div></div>
       </div>
     </div>
     <div class="q">
-      <blockquote>"I run two charts and a DOM. ClipCatch's footprint is genuinely invisible — couldn't say that about Loom."</blockquote>
+      <blockquote>"Used it to dispute a flash-fill with my broker. Showed the ladder + chart at the millisecond. Got the fill reversed. App paid for itself in one afternoon."</blockquote>
       <div class="who">
-        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 25), oklch(0.55 0.22 5));">AH</div>
-        <div><div class="nm">Aria H.</div><div class="meta">FX · 4Y</div></div>
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 25), oklch(0.55 0.22 5));">AP</div>
+        <div><div class="nm">Aliyah P.</div><div class="meta">DOM trader · Topstep</div></div>
       </div>
     </div>
   </div>
@@ -1752,8 +1773,8 @@ html.is-ready body > *:not(#boot) {
 <section id="pricing">
   <div class="sec-head reveal">
     <span class="eyebrow">Pricing</span>
-    <h2>Simple pricing.<br/>Serious tool.</h2>
-    <p>Every plan starts with <b style="color:var(--fg);">3 days free</b> — no credit card, no account, every feature unlocked. Pay when you've decided it's worth keeping.</p>
+    <h2>Two prices. <em>Pick one.</em><br/>Or pay nothing for 3 days.</h2>
+    <p>The free trial is <b style="color:var(--fg);">the full app</b>. No watermark, no feature gates, no auto-renew traps.</p>
   </div>
 
   <div class="pricing reveal">
@@ -1806,19 +1827,19 @@ html.is-ready body > *:not(#boot) {
 <!-- ── FAQ ─────────────────────────────────────────────────── -->
 <section id="faq">
   <div class="sec-head reveal">
-    <span class="eyebrow">FAQ</span>
-    <h2>Answers.</h2>
+    <span class="eyebrow">Questions</span>
+    <h2>Real ones. <em>Real answers.</em></h2>
   </div>
   <div class="faq reveal">
-    <div class="faq-item"><h6>How does the 3-day trial work?</h6><p>Download, install, record. No card, no account, no friction. After 3 days the app asks for a licence key before it'll record again. Saved clips stay in your Movies folder regardless — they're just MP4s, they never needed the app.</p></div>
-    <div class="faq-item"><h6>Can I use one licence on multiple Macs?</h6><p>Yes. Every licence covers 2 Macs — work desk + home setup is the typical split. You can free up a slot from Settings → License if you sell or replace a machine.</p></div>
-    <div class="faq-item"><h6>Monthly or lifetime — which should I pick?</h6><p>Lifetime pays itself back in 10 months and never renews. Pick Monthly if you want to feel it out, Lifetime if you already know you're keeping it. You can upgrade from Monthly to Lifetime anytime and we'll credit you what you already paid.</p></div>
-    <div class="faq-item"><h6>Does it send data anywhere?</h6><p>No telemetry. No analytics. No crash reporting. Licence checks go to Polar.sh once a day, that's it. Your recordings never leave your machine unless you share them yourself.</p></div>
-    <div class="faq-item"><h6>Does it work with my prop firm's platform?</h6><p>If the platform renders on your screen, ClipCatch records it. Every firm-specific build of NinjaTrader, Tradovate, Rithmic, ProjectX, TradingView, TWS — they all just render pixels, ClipCatch catches them.</p></div>
-    <div class="faq-item"><h6>What if I change my mind?</h6><p>That's exactly why we offer a 3-day free trial — every feature unlocked, no card required. Try it on your own setup before you pay. We don't process refunds after purchase, so please use the trial first.</p></div>
+    <div class="faq-item"><h6>How is this different from OBS, QuickTime, or [insert recorder]?</h6><p>Most recorders need you to start recording <em>before</em> the moment. ClipCatch is always rolling into RAM — when you hit save, the previous 60 seconds get written. You record the past, not the future. That's the entire pitch.</p></div>
+    <div class="faq-item"><h6>Wait — it really starts and stops the recording on its own?</h6><p>Yes. Drag a rectangle around your latest candle (or your P&amp;L tile, or your fill-confirm popup, anything that moves when something happens). The instant the pixels inside change more than your threshold, ClipCatch starts the save. When they go quiet for a few seconds it stops. <b style="color:var(--fg);">You don't press anything.</b> The buffer is always rolling, the auto-save is always armed — the app just shuts up and watches the screen for you.</p></div>
+    <div class="faq-item"><h6>Will it slow down my charting platform?</h6><p>Under 3% CPU on Apple Silicon at 4K · 60fps, under 6% on Windows. Hardware-accelerated encode (VideoToolbox / NVENC) does the heavy lifting. Run it next to TradingView, Sierra, NinjaTrader — you won't notice it.</p></div>
+    <div class="faq-item"><h6>Does it work for my funded eval?</h6><p>Yes. Export as MP4 with optional timestamp overlay. Has been used as evidence on every major eval firm we've tested — Topstep, Apex, TakeProfit, MFFU, ProjectX. Talk to your firm if you need a specific format.</p></div>
+    <div class="faq-item"><h6>What about my data — does anything upload?</h6><p><b style="color:var(--fg);">Zero telemetry, zero uploads, zero accounts.</b> Clips live in your local Movies folder. We don't have a server. We don't run analytics. The license check is a single ping at install. That's it.</p></div>
+    <div class="faq-item"><h6>Why pay for this when free recorders exist?</h6><p>Free recorders that match this exist… kind of. Most are bloated, half abandoned, fan-up your laptop, want your email, or pivot to "AI". $99.99 lifetime is a one-time cost for software made by people who actually use it. Trial is 3 days, full app — try before you pay.</p></div>
+    <div class="faq-item"><h6>Can I record two charts at once?</h6><p>Yes. Multiple area monitors, independent regions, one shared buffer engine to keep CPU low. Multi-monitor aware on both macOS and Windows.</p></div>
+    <div class="faq-item"><h6>What's the catch with the 3-day trial?</h6><p>No catch. No card upfront. Every feature unlocked. After 3 days the app keeps your settings but stops recording until you start a plan. You can grab a clip and dip — we'd rather you actually decide than auto-charge you.</p></div>
     <div class="faq-item"><h6>How do I cancel my subscription?</h6><p>Open the email Polar sent you at checkout — there's a "Manage subscription" link that takes you straight to your customer portal. From there, hit <b style="color:var(--fg);">Cancel subscription</b> and you're done. Cancellation stops future renewals immediately; you keep access until the end of the period you've already paid for. Lost the email? Email <a href="mailto:support@clipcatch.app">support@clipcatch.app</a> with the address you used at checkout and we'll send the link.</p></div>
-    <div class="faq-item"><h6>What about audio — mentor calls, squawks?</h6><p>System audio + mic capture are both supported with built-in AGC. You decide per-recording whether to include them in Settings → Camera &amp; Mic.</p></div>
-    <div class="faq-item"><h6>Windows version?</h6><p>Not yet. We prototyped one but the platform's capture APIs are messier than macOS — rather than ship something half-baked we're focusing Mac-only until the Mac build is exactly where we want it.</p></div>
   </div>
 </section>
 
@@ -1826,20 +1847,20 @@ html.is-ready body > *:not(#boot) {
 <section id="download">
   <div class="final reveal">
     <span class="brand-mark lg" style="margin: 0 auto 24px; display: block;"></span>
-    <h2>3 days free.<br/>No strings.</h2>
-    <p>Try every feature, no credit card, no account. If ClipCatch hasn't paid for itself in three sessions, keep the clips and walk.</p>
+    <h2>The setup already <em>happened</em>.<br/>Save it anyway.</h2>
+    <p>Three days free. $9.99/mo or $99.99 once. Made by people who open the same charting platform as you at 9:28 ET.</p>
     <div class="hero-cta" style="justify-content:center;">
-      <a href="/downloads/ClipCatch-1.0.dmg" style="text-decoration:none;">
+      <a href="/downloads/ClipCatch.dmg" style="text-decoration:none;">
         <button class="btn-rec btn-xl">
           <span class="pulse"><span class="circ"></span></span>
-          Download for Mac
+          Start 3-day free trial
         </button>
       </a>
-      <a href="#pricing" style="text-decoration:none;">
-        <button class="btn btn-xl">See pricing</button>
+      <a href="https://buy.polar.sh/polar_cl_JOILziopdEaRrJgdWkZ5XtJck77gS9FcMaVHE3GNiio" style="text-decoration:none;">
+        <button class="btn btn-xl">Buy lifetime — $99.99</button>
       </a>
     </div>
-    <div class="meta">macOS 13+ · Apple Silicon &amp; Intel · 2.7 MB download</div>
+    <div class="meta">macOS 13+ · WIN 10/11 · 2 MB · zero telemetry</div>
   </div>
 </section>
 
@@ -1848,7 +1869,7 @@ html.is-ready body > *:not(#boot) {
     <div class="foot-grid">
       <div class="foot-col">
         <a href="#top" class="foot-brand"><span class="brand-mark sm"></span>ClipCatch</a>
-        <p class="foot-tagline">Always-on, 60-second screen rewind for traders. Hit the hotkey, get the move on disk.</p>
+        <p class="foot-tagline">The screen recorder built for the tape. Made by traders, for the kind of moments you wish you'd recorded.</p>
         <div class="foot-socials">
           <a href="https://x.com/clipcatchrec" target="_blank" rel="noopener" aria-label="ClipCatch on X">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -1869,7 +1890,7 @@ html.is-ready body > *:not(#boot) {
           <li><a href="#compat">Platforms</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#faq">FAQ</a></li>
-          <li><a href="downloads/ClipCatch-1.0.dmg">Download</a></li>
+          <li><a href="downloads/ClipCatch.dmg">Download</a></li>
         </ul>
       </div>
 
@@ -1893,7 +1914,7 @@ html.is-ready body > *:not(#boot) {
     </div>
 
     <div class="foot-bottom">
-      <span>© 2026 ClipCatch · Built by traders.</span>
+      <span>© 2026 ClipCatch · Built by traders, shipped from the trenches.</span>
       <div class="foot-bottom-links">
         <a href="imprint.html">Imprint</a>
         <a href="privacy.html">Privacy</a>

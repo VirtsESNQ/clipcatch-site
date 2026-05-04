@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>ClipCatch</title>
+    <link>https://clipcatch.app/appcast.xml</link>
+    <description>ClipCatch release notes + auto-update feed.</description>
+    <language>en</language>
+    <!-- New release entries are appended above this comment by setup-dev3.sh -->
+  </channel>
+</rss>
