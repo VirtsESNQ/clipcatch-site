@@ -1,21 +1,2098 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>ClipCatch</title>
-<meta name="viewport" content="width=1440"/>
-<link rel="icon" href="app/logo.png"/>
-<meta http-equiv="refresh" content="0; url=ClipCatch%20Website.html"/>
-<link rel="canonical" href="ClipCatch%20Website.html"/>
-<script>location.replace("ClipCatch%20Website.html");</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<!-- Match `--bg-deep` exactly so iOS Safari's chrome (status bar / URL bar)
+     blends seamlessly with the page edges. Without this, iOS overlays its
+     bars in a slightly different navy than what the page actually paints,
+     creating a visible horizontal seam on mobile. -->
+<meta name="theme-color" content="#080d18" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="ClipCatch" />
+<title>ClipCatch — Never miss the setup again.</title>
+<meta name="description" content="ClipCatch keeps the last sixty seconds of your screen always ready to save. Hit the hotkey, get the move on disk." />
+<link rel="stylesheet" href="app/tokens.css"/>
+<!-- Favicons. Safari is finicky about non-root paths and ignores ?v=
+     cachebusters once an icon's been resolved, so we serve the icons
+     from BOTH /app/ and the site root. The root copies are what Safari
+     actually picks up. -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=6"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=6"/>
+<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png?v=6"/>
+<link rel="shortcut icon" href="/favicon.ico?v=6"/>
+<link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png?v=6"/>
+<link rel="apple-touch-icon-precomposed" sizes="512x512" href="/apple-touch-icon-precomposed.png?v=6"/>
+<!-- Preload the showcase screenshot so it starts streaming during the
+     boot loader, never showing a half-loaded grey rectangle. -->
+<link rel="preload" as="image" href="assets/screen-recorder.png" fetchpriority="high"/>
 <style>
-  html,body{margin:0;background:oklch(0.085 0.008 260);color:oklch(0.72 0.01 260);
-    font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
-    display:grid;place-items:center;min-height:100vh;}
-  a{color:oklch(0.97 0 0);text-decoration:none;border-bottom:1px solid oklch(0.655 0.205 258);}
+/* ───────────────────────────────────────────────────────────────────
+   Page-specific layout — uses tokens from /app/tokens.css.
+   Almost all chrome (cards, glow, orb, buttons) is already styled
+   over there; this stylesheet handles flow and feature visuals only.
+   ─────────────────────────────────────────────────────────────────── */
+
+.site { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+section { padding: 96px 0; }
+section:first-of-type { padding-top: 56px; }
+section.tight { padding: 56px 0; }
+
+/* ── Trial banner (sticky above nav) ─────────────────────────────── */
+.trial-banner {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  height: 36px;
+  background: linear-gradient(90deg,
+    oklch(0.45 0.22 258 / 0.95), oklch(0.65 0.20 245 / 0.95));
+  color: #fff; font-size: 12px; font-weight: 500;
+  letter-spacing: -0.005em;
+  box-shadow: 0 6px 24px -10px oklch(0.65 0.18 245 / 0.6);
+}
+.trial-banner b { font-weight: 700; }
+.trial-banner a {
+  color: #fff; text-decoration: none; font-weight: 600;
+  background: oklch(1 0 0 / 0.18); padding: 4px 12px; border-radius: 6px;
+}
+.trial-banner a:hover { background: oklch(1 0 0 / 0.32); }
+
+/* ── Nav ────────────────────────────────────────────────────────── */
+nav.top {
+  position: sticky; top: 36px; z-index: 99;
+  display: flex; align-items: center; gap: 24px;
+  height: 60px;
+  padding: 0 28px;
+  max-width: 1180px; margin: 0 auto;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+nav.top::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, oklch(0.045 0.030 258 / 0.85), oklch(0.045 0.030 258 / 0.55));
+  z-index: -1;
+}
+nav.top .brand {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  font-size: 16px; font-weight: 600; color: var(--fg); letter-spacing: -0.01em;
+}
+nav.top .brand .brand-mark { width: 22px; height: 22px; }
+nav.top .links {
+  display: flex; gap: 22px; margin-left: 16px;
+  font-size: 13px; color: var(--fg-mute);
+}
+nav.top .links a { text-decoration: none; transition: color 0.15s ease; }
+nav.top .links a:hover { color: var(--fg); }
+nav.top .right { margin-left: auto; display: flex; gap: 10px; }
+
+/* ── Brand mark — the AppLogoMarkLite from the app: just the glowing
+   cyan glass dot with a soft halo, no squircle frame. Flows into
+   the page's ambient gradient instead of sitting on it like a
+   pasted app-icon thumbnail. */
+.brand-mark {
+  position: relative;
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px;
+  background: transparent;
+  flex-shrink: 0;
+}
+.brand-mark::before {
+  /* Outer halo bloom — sits behind the dot, fades into the bg. */
+  content: ""; position: absolute; inset: -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    oklch(0.78 0.18 245 / 0.55) 0%,
+    oklch(0.78 0.18 245 / 0.20) 45%,
+    transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+.brand-mark::after {
+  /* The cyan glass dot. */
+  content: "";
+  width: 70%; height: 70%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%,
+      oklch(0.98 0.03 220) 0%,
+      oklch(0.78 0.18 240) 38%,
+      oklch(0.45 0.22 250) 80%,
+      oklch(0.18 0.18 260) 100%);
+  box-shadow:
+    inset 0 0.5px 0 oklch(1 0 0 / 0.55),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.30),
+    0 0 16px oklch(0.78 0.18 245 / 0.55);
+}
+.brand-mark.sm { width: 18px; height: 18px; }
+.brand-mark.lg { width: 64px; height: 64px; }
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 48px;
+  align-items: center;
+  padding: 80px 0 60px;
+}
+.hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 12px; margin-bottom: 24px;
+  background: var(--cyan-soft); color: oklch(0.88 0.10 245);
+  border-radius: 999px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  white-space: nowrap; max-width: 100%;
+}
+.hero .eyebrow .pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: oklch(0.78 0.18 245); color: #03081C;
+  padding: 2px 8px; border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.hero .eyebrow .tail { white-space: nowrap; }
+.hero h1 {
+  margin: 0 0 22px;
+  font-size: clamp(48px, 6.4vw, 84px);
+  font-weight: 600;
+  letter-spacing: -0.035em; line-height: 1.0;
+  color: var(--fg);
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(180deg, oklch(0.95 0.06 245), oklch(0.65 0.20 250));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 32px oklch(0.65 0.20 250 / 0.35);
+}
+.hero-sub {
+  font-size: 18px; line-height: 1.55;
+  color: var(--fg-mute); max-width: 540px;
+  margin: 0 0 30px;
+}
+.hero-cta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.hero-meta {
+  margin-top: 22px;
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 11px; color: var(--fg-faint);
+}
+.hero-meta b { color: var(--fg-mute); font-weight: 500; }
+.hero-orb {
+  display: grid; place-items: center;
+  position: relative;
+}
+
+/* On narrow screens, stack and hide the side orb. */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 32px; padding: 56px 0 40px; }
+  .hero-orb { order: -1; }
+  .hero-orb .orb { width: 220px !important; height: 220px !important; }
+}
+
+/* ── Stat strip ─────────────────────────────────────────────────── */
+.statbar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: 28px 0;
+  border-top: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--line);
+}
+.statbar .stat {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  border-right: 0.5px solid var(--line);
+}
+.statbar .stat:last-child { border-right: 0; }
+.statbar .stat .n {
+  font-size: 38px; font-weight: 600; letter-spacing: -0.025em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 24px oklch(0.78 0.18 245 / 0.30);
+}
+.statbar .stat .n small {
+  font-size: 18px; font-weight: 500; opacity: 0.5; margin-left: 2px;
+  vertical-align: 2px;
+}
+.statbar .stat .l {
+  font-size: 11.5px; color: var(--fg-faint);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  font-family: var(--mono);
+}
+@media (max-width: 720px) {
+  .statbar { grid-template-columns: repeat(2, 1fr); }
+  .statbar .stat:nth-child(2) { border-right: 0; }
+}
+
+/* ── Showcase / app screenshot ──────────────────────────────────── */
+.showcase-frame {
+  position: relative;
+  max-width: 1080px;
+  margin: 0 auto;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.showcase-frame:hover {
+  transform: perspective(1800px) rotateX(1.2deg) translateY(-4px) scale(1.005);
+}
+.showcase-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Reserve the right aspect ratio so the layout doesn't show an
+     empty rectangle while the screenshot is still decoding. The
+     screenshot is 2584×1744 ≈ 1.482:1. */
+  aspect-ratio: 2584 / 1744;
+  background: transparent;
+  /* Cyan-blue ambient glow only — no dark drop-shadow, no border. */
+  filter:
+    drop-shadow(0 0 60px oklch(0.62 0.22 258 / 0.45))
+    drop-shadow(0 0 120px oklch(0.55 0.22 245 / 0.30));
+  transition: filter 0.5s ease, opacity 0.5s ease;
+}
+/* While the image is still decoding, fade it in instead of popping in
+   as a hard rectangle. */
+.showcase-frame img:not(.is-loaded) {
+  opacity: 0;
+}
+.showcase-frame img.is-loaded {
+  opacity: 1;
+}
+.showcase-frame:hover img.is-loaded {
+  filter:
+    drop-shadow(0 0 80px oklch(0.62 0.22 258 / 0.60))
+    drop-shadow(0 0 160px oklch(0.55 0.22 245 / 0.40));
+}
+.showcase-glow {
+  position: absolute;
+  inset: -30% 5% auto 5%;
+  height: 70%;
+  background: radial-gradient(ellipse at 50% 50%, oklch(0.62 0.22 258 / 0.35), transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ── Section heads ──────────────────────────────────────────────── */
+.sec-head { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+.sec-head .eyebrow {
+  display: inline-block; margin-bottom: 16px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: oklch(0.78 0.18 245);
+}
+.sec-head h2 {
+  margin: 0 0 16px;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600; letter-spacing: -0.03em;
+  color: var(--fg); line-height: 1.05;
+}
+.sec-head p {
+  font-size: 17px; color: var(--fg-mute); margin: 0; line-height: 1.55;
+}
+
+/* ── 3-column "Three things" cards ──────────────────────────────── */
+.pillars {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.pillar {
+  padding: 28px 26px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 0 0 0.5px var(--line),
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 24px 48px -24px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 14px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.pillar:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 32px 60px -24px var(--cyan-glow);
+}
+.pillar .num {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; color: oklch(0.78 0.18 245);
+}
+.pillar h5 {
+  margin: 0; font-size: 19px; font-weight: 600;
+  letter-spacing: -0.018em; color: var(--fg); line-height: 1.25;
+}
+.pillar p { margin: 0; font-size: 14px; color: var(--fg-mute); line-height: 1.55; }
+.pillar .visual {
+  height: 130px; margin-top: auto;
+  border-radius: 10px;
+  background: oklch(0.06 0.025 258);
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  position: relative; overflow: hidden;
+}
+@media (max-width: 760px) { .pillars { grid-template-columns: 1fr; } }
+
+/* ── Alternating feature blocks ─────────────────────────────────── */
+.feature {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px; align-items: center;
+}
+.feature.flip > .copy { order: 2; }
+.feature .eyebrow {
+  display: inline-block; margin-bottom: 14px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: oklch(0.78 0.18 245);
+}
+.feature h3 {
+  margin: 0 0 18px;
+  font-size: clamp(32px, 3.5vw, 44px);
+  font-weight: 600; letter-spacing: -0.025em;
+  color: var(--fg); line-height: 1.05;
+}
+.feature h3 em {
+  font-style: normal;
+  background: linear-gradient(180deg, oklch(0.92 0.10 240), oklch(0.55 0.22 255));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.feature p { font-size: 16.5px; color: var(--fg-mute); line-height: 1.6; margin: 0 0 24px; }
+.feature ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.feature ul li {
+  display: grid; grid-template-columns: 18px 1fr; gap: 12px;
+  font-size: 14.5px; color: var(--fg-mute); line-height: 1.55;
+}
+.feature ul li svg { margin-top: 3px; color: var(--cyan); }
+
+/* Feature visual — generic frame */
+.feat-visual {
+  position: relative;
+  aspect-ratio: 1.05 / 1;
+  border-radius: 22px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line),
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 40px 80px -40px var(--rec-glow);
+  overflow: hidden;
+}
+.feat-visual::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 18%, oklch(0.78 0.18 245 / 0.18), transparent 50%),
+    radial-gradient(circle at 80% 86%, oklch(0.55 0.22 258 / 0.20), transparent 50%);
+  pointer-events: none;
+}
+
+@media (max-width: 880px) {
+  .feature { grid-template-columns: 1fr; gap: 32px; }
+  .feature.flip > .copy { order: 1; }
+}
+
+/* Buffer-feature timeline */
+.buf-bars {
+  position: absolute; inset: 16% 18% 28% 18%;
+  display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; align-items: end;
+}
+.buf-bars span {
+  background: linear-gradient(180deg, oklch(0.35 0.12 258), oklch(0.15 0.06 258));
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 0.5px oklch(0.50 0.18 258 / 0.35);
+}
+.buf-bars span.live {
+  background: linear-gradient(180deg, oklch(0.85 0.18 245), oklch(0.55 0.22 258));
+  box-shadow: 0 0 12px oklch(0.78 0.18 245 / 0.7);
+}
+.buf-tag {
+  position: absolute; top: 22px; left: 22px;
+  padding: 6px 10px; border-radius: 8px;
+  background: oklch(0.06 0.025 258 / 0.7);
+  backdrop-filter: blur(8px);
+  color: var(--fg);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  box-shadow: inset 0 0 0 0.5px var(--line);
+}
+.buf-tag .dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+  vertical-align: middle; margin-right: 6px;
+}
+.buf-axis {
+  position: absolute; left: 18%; right: 18%; bottom: 16%;
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9.5px; color: var(--fg-faint);
+  letter-spacing: 0.06em;
+}
+
+/* Area-monitor visual — pulsing ring */
+.scan-frame {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 58%; aspect-ratio: 1.6/1;
+  border-radius: 12px;
+  border: 1.5px dashed oklch(0.78 0.18 245 / 0.65);
+  box-shadow:
+    0 0 0 1px oklch(0.78 0.18 245 / 0.18),
+    0 0 32px oklch(0.78 0.18 245 / 0.35),
+    inset 0 0 32px oklch(0.78 0.18 245 / 0.08);
+  animation: scan-pulse 2.6s ease-in-out infinite;
+}
+.scan-corner {
+  position: absolute; width: 14px; height: 14px;
+  border: 2px solid oklch(0.85 0.18 245);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.scan-corner.tl { top: -7px; left: -7px; border-right: 0; border-bottom: 0; }
+.scan-corner.tr { top: -7px; right: -7px; border-left: 0; border-bottom: 0; }
+.scan-corner.bl { bottom: -7px; left: -7px; border-right: 0; border-top: 0; }
+.scan-corner.br { bottom: -7px; right: -7px; border-left: 0; border-top: 0; }
+
+.scan-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, oklch(0.85 0.18 245 / 0.85), transparent);
+  box-shadow: 0 0 12px oklch(0.78 0.18 245 / 0.7);
+  animation: scan-sweep 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scan-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px oklch(0.78 0.18 245 / 0.18), 0 0 24px oklch(0.78 0.18 245 / 0.30), inset 0 0 24px oklch(0.78 0.18 245 / 0.06); }
+  50%      { box-shadow: 0 0 0 1px oklch(0.78 0.18 245 / 0.30), 0 0 48px oklch(0.78 0.18 245 / 0.50), inset 0 0 36px oklch(0.78 0.18 245 / 0.12); }
+}
+@keyframes scan-sweep {
+  0%   { top: 18%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 82%; opacity: 0; }
+}
+
+/* Region-picker visual — selection rectangle being drawn.
+   Empty canvas, just a hairline frame; lets the parent glass show
+   through and keeps the focus on the picker rectangle itself. */
+.region-canvas {
+  position: absolute; inset: 8%;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: inset 0 0 0 0.5px var(--line-soft);
+  overflow: hidden;
+}
+.region-rect {
+  position: absolute; left: 22%; top: 28%; width: 46%; height: 36%;
+  border-radius: 6px;
+  background: oklch(0.78 0.18 245 / 0.12);
+  border: 1px solid oklch(0.85 0.18 245 / 0.7);
+  box-shadow:
+    0 0 24px oklch(0.78 0.18 245 / 0.45),
+    inset 0 0 24px oklch(0.78 0.18 245 / 0.08);
+}
+.region-rect::before {
+  content: "640 × 420"; position: absolute; bottom: -22px; right: 0;
+  font-family: var(--mono); font-size: 10px; color: var(--cyan);
+  letter-spacing: 0.04em;
+}
+.region-cursor {
+  position: absolute; right: 28%; top: 60%;
+  width: 14px; height: 14px;
+  background: linear-gradient(135deg, oklch(0.95 0.05 245), oklch(0.65 0.22 250));
+  border-radius: 2px; transform: rotate(-25deg);
+  box-shadow: 0 0 12px oklch(0.78 0.18 245 / 0.7);
+}
+
+/* ── Use cases (4-col card grid) ────────────────────────────────── */
+.usecases {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.uc {
+  padding: 22px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px) saturate(1.15);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 0 0 0.5px var(--line),
+    0 24px 48px -24px rgba(0,0,0,0.4);
+  display: flex; flex-direction: column; gap: 10px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.uc:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    0 32px 60px -24px var(--cyan-glow);
+}
+.uc .tag {
+  align-self: flex-start;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--cyan-soft);
+  color: oklch(0.85 0.10 245);
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.uc h4 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--fg); }
+.uc p  { margin: 0; font-size: 13.5px; color: var(--fg-mute); line-height: 1.55; }
+@media (max-width: 880px) { .usecases { grid-template-columns: 1fr; } }
+
+/* ── Compatibility logo grid ────────────────────────────────────── */
+.compat {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px; max-width: 980px; margin: 0 auto;
+}
+.compat-item {
+  padding: 22px 12px;
+  background: var(--bg-card);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.compat-item:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    0 16px 36px -16px var(--cyan-glow);
+}
+.compat-item .glyph {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 9px;
+  background: oklch(0.10 0.04 258);
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  color: oklch(0.78 0.18 245);
+}
+.compat-item .nm { font-size: 13px; font-weight: 600; color: var(--fg); }
+.compat-item .sub { font-size: 10.5px; color: var(--fg-faint); font-family: var(--mono); }
+@media (max-width: 760px) { .compat { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px) { .compat { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── Quotes ─────────────────────────────────────────────────────── */
+.quotes { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; }
+.q {
+  padding: 26px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px) saturate(1.15);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.q.big blockquote { font-size: 21px; line-height: 1.4; }
+.q blockquote {
+  margin: 0; font-size: 15px; line-height: 1.55;
+  color: var(--fg); letter-spacing: -0.012em;
+}
+.q blockquote em { color: oklch(0.85 0.18 245); font-style: normal; }
+.q .who { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.q .av {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, oklch(0.62 0.22 258), oklch(0.40 0.22 258));
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 12px; color: #fff;
+  box-shadow: inset 0 0 0 0.5px oklch(1 0 0 / 0.18);
+}
+.q .nm { font-size: 13px; font-weight: 600; color: var(--fg); }
+.q .meta { font-size: 11px; color: var(--fg-faint); font-family: var(--mono); }
+@media (max-width: 880px) { .quotes { grid-template-columns: 1fr; } }
+
+/* ── Pricing ────────────────────────────────────────────────────── */
+.pricing { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 820px; margin: 0 auto; }
+.plan {
+  position: relative;
+  padding: 32px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.plan.featured {
+  background: linear-gradient(180deg, oklch(0.18 0.08 258), var(--bg-card));
+  box-shadow:
+    inset 0 0 0 1px var(--line-glow),
+    0 36px 72px -24px var(--rec-glow);
+}
+.plan .badge {
+  position: absolute; top: 22px; right: 22px;
+  font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.10em;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--rec); color: #fff;
+  box-shadow: 0 8px 24px -8px var(--rec-glow);
+}
+.plan h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--fg); letter-spacing: 0.02em; text-transform: uppercase; }
+.plan .price { font-size: 48px; font-weight: 600; letter-spacing: -0.03em; color: var(--fg); line-height: 1; }
+.plan .terms { color: var(--fg-mute); font-size: 13px; margin-top: 4px; }
+.plan ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.plan ul li {
+  display: grid; grid-template-columns: 18px 1fr; gap: 12px;
+  font-size: 13.5px; color: var(--fg-mute); align-items: flex-start;
+}
+.plan ul li svg { color: var(--cyan); margin-top: 3px; }
+@media (max-width: 760px) { .pricing { grid-template-columns: 1fr; } }
+
+/* ── FAQ ────────────────────────────────────────────────────────── */
+.faq { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.faq-item {
+  padding: 18px 22px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 0.5px var(--line);
+  transition: box-shadow 0.2s ease;
+}
+.faq-item:hover { box-shadow: inset 0 0 0 0.5px var(--line-glow); }
+.faq-item h6 { margin: 0 0 6px; font-size: 14.5px; font-weight: 600; color: var(--fg); letter-spacing: -0.012em; }
+.faq-item p  { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--fg-mute); }
+.faq-item p a { color: var(--cyan); text-decoration: none; }
+
+/* ── Final CTA ──────────────────────────────────────────────────── */
+.final {
+  position: relative;
+  text-align: center;
+  padding: 96px 28px;
+  border-radius: 28px;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    0 60px 120px -40px var(--rec-glow);
+  overflow: hidden;
+}
+.final::before {
+  content: ""; position: absolute; inset: -10%;
+  background:
+    radial-gradient(circle at 50% 0%, oklch(0.78 0.18 245 / 0.30), transparent 55%),
+    radial-gradient(circle at 50% 100%, oklch(0.55 0.22 258 / 0.30), transparent 55%);
+  pointer-events: none;
+}
+.final > * { position: relative; }
+.final h2 { margin: 0 0 16px; font-size: clamp(36px, 5vw, 60px); font-weight: 600; letter-spacing: -0.03em; color: var(--fg); line-height: 1.05; }
+.final p { margin: 0 0 26px; font-size: 17px; color: var(--fg-mute); max-width: 620px; margin-left: auto; margin-right: auto; }
+.final .meta { margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--fg-faint); }
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+footer { padding: 56px 28px 56px; }
+.foot-inner {
+  max-width: 1180px; margin: 0 auto;
+  border-top: 0.5px solid var(--line);
+  padding-top: 40px;
+}
+.foot-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 36px;
+}
+.foot-col h4 {
+  margin: 0 0 14px; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--fg-faint); font-weight: 600;
+}
+.foot-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.foot-col a {
+  font-size: 13px; color: var(--fg-mute); text-decoration: none;
+  transition: color 0.15s ease;
+}
+.foot-col a:hover { color: var(--fg); }
+.foot-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 600; color: var(--fg);
+  text-decoration: none; margin-bottom: 14px;
+}
+.foot-tagline {
+  font-size: 13px; color: var(--fg-mute); line-height: 1.55;
+  max-width: 280px; margin: 0 0 18px;
+}
+.foot-socials { display: flex; gap: 10px; }
+.foot-socials a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: oklch(1 0 0 / 0.04);
+  border: 0.5px solid var(--line);
+  color: var(--fg-mute);
+  transition: all 0.18s ease;
+}
+.foot-socials a:hover {
+  color: var(--fg);
+  background: oklch(1 0 0 / 0.08);
+  border-color: oklch(1 0 0 / 0.18);
+  transform: translateY(-1px);
+}
+.foot-socials svg { width: 16px; height: 16px; }
+.foot-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  padding-top: 24px;
+  border-top: 0.5px solid var(--line);
+  font-size: 12px; color: var(--fg-faint);
+}
+.foot-bottom-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.foot-bottom-links a { color: var(--fg-faint); text-decoration: none; }
+.foot-bottom-links a:hover { color: var(--fg-mute); }
+@media (max-width: 760px) {
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+  .foot-col:first-child { grid-column: 1 / -1; }
+}
+
+/* ── Tactile 3D hover ────────────────────────────────────────────
+   Cards, plans, features, FAQ items, compat tiles — they all lift
+   slightly + tilt forward when the cursor enters. Spring-y ease so
+   it feels physical, not robotic. Composited (transform + shadow
+   only), no layout cost. */
+.pillar, .uc, .q, .plan, .feat-visual, .compat-item, .faq-item {
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.pillar:hover, .uc:hover {
+  transform: perspective(1200px) translateY(-5px) rotateX(2.5deg) scale(1.015);
+}
+.q:hover {
+  transform: perspective(1200px) translateY(-4px) rotateX(2deg) scale(1.012);
+}
+.compat-item:hover {
+  transform: perspective(1000px) translateY(-3px) rotateX(3deg) scale(1.03);
+}
+.faq-item:hover {
+  transform: perspective(1200px) translateY(-2px) scale(1.008);
+}
+.plan:hover {
+  transform: perspective(1400px) translateY(-4px) rotateX(1.5deg) scale(1.012);
+}
+.feat-visual:hover {
+  transform: perspective(1400px) rotateY(-2.5deg) rotateX(1.5deg) translateY(-3px) scale(1.012);
+}
+
+/* ── Reveal-on-scroll — 3D rise + scale ─────────────────────────
+   Each block tilts up from below the floor as it scrolls into
+   view, scales from 96% to 100%, and fades in. Looks tactile
+   without ever touching layout (only transform + opacity, both
+   GPU). The smooth-out ease (cubic-bezier 0.22, 1, 0.36, 1) is
+   the "Apple product page" curve — slow tail, snappy start. */
+.reveal {
+  opacity: 0;
+  transform: perspective(1400px) translateY(48px) rotateX(8deg) scale(0.96);
+  transition:
+    opacity 0.65s ease,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center 60%;
+  will-change: transform, opacity;
+}
+.reveal.in {
+  opacity: 1;
+  transform: perspective(1400px) translateY(0) rotateX(0) scale(1);
+}
+/* Once the animation has finished, drop will-change so the
+   browser doesn't keep paying the layer cost forever. */
+.reveal.in.done { will-change: auto; }
+
+/* ── Feature ticker ──────────────────────────────────────────────
+   Slim dark strip running edge-to-edge, mono labels with cyan-blue
+   accents — same shape as the old market ticker but listing
+   ClipCatch's features instead of futures symbols. */
+.tickers {
+  position: relative; z-index: 1;
+  height: 38px; overflow: hidden;
+  border-top: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--line);
+  background: oklch(0.10 0.05 263 / 0.55);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+  margin: 24px 0 0;
+}
+.ticker-track {
+  display: inline-flex; gap: 36px;
+  height: 38px; align-items: center;
+  white-space: nowrap;
+  padding-left: 32px;
+  animation: ticker-scroll 60s linear infinite;
+  font-family: var(--mono); font-size: 12px; color: var(--fg-mute);
+  letter-spacing: 0.01em;
+}
+.ticker-track .tk { display: inline-flex; align-items: center; gap: 8px; }
+.ticker-track .tk b {
+  color: var(--fg); font-weight: 600;
+  font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.04em;
+}
+.ticker-track .tk .px {
+  font-variant-numeric: tabular-nums; color: var(--fg);
+}
+/* Cyan accents replace the old up/dn green/red colouring. */
+.ticker-track .tk i  { font-style: normal; color: oklch(0.78 0.18 245); }
+.ticker-track .tk::after {
+  content: "·"; color: var(--fg-dim); margin-left: 36px; opacity: 0.5;
+}
+.ticker-track .tk:last-child::after { content: ""; }
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+}
+
+/* ── Floating particles (hero ambient) ─────────────────────────── */
+.particles {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: oklch(0.85 0.15 245);
+  box-shadow: 0 0 8px oklch(0.78 0.18 245 / 0.7);
+  opacity: 0;
+  animation: float-up linear infinite;
+}
+@keyframes float-up {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.6); }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translateY(-220px) scale(1.0); }
+}
+
+/* Hero needs to allow the particles to be absolutely positioned */
+.hero { position: relative; }
+.hero .copy, .hero .hero-orb { position: relative; z-index: 1; }
+
+/* No animated decoration on the featured plan — keeps it clean and
+   stops the page from spinning a giant gradient continuously. */
+
+/* ── Floating record badge over the orb ────────────────────────── */
+.orb-badge {
+  position: absolute; top: 12%; right: 6%;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: oklch(0.10 0.045 268 / 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 0.5px oklch(0.78 0.18 245 / 0.4),
+              0 12px 28px -10px oklch(0.78 0.18 245 / 0.5);
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: oklch(0.85 0.18 245);
+  animation: orb-badge-float 4.5s ease-in-out infinite;
+  z-index: 2;
+}
+.orb-badge .dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: oklch(0.78 0.18 145);
+  box-shadow: 0 0 8px oklch(0.78 0.18 145 / 0.8);
+  animation: pulseFlash 1.4s ease-in-out infinite;
+}
+@keyframes orb-badge-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ── Live counter (stats strip) — handled by JS ────────────────── */
+.statbar .stat .n { transition: text-shadow 0.4s ease; }
+
+/* ── Quote-card hover tilt ─────────────────────────────────────── */
+.q { transition: transform 0.35s ease, box-shadow 0.35s ease; }
+.q:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    0 30px 60px -20px var(--cyan-glow);
+}
+
+/* ── Pillar shimmer on hover (live ChatGPT-style sheen) ────────── */
+.pillar {
+  position: relative; overflow: hidden;
+}
+.pillar::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg,
+    transparent 0%, transparent 40%,
+    oklch(0.78 0.18 245 / 0.10) 50%,
+    transparent 60%, transparent 100%);
+  transform: translateX(-100%);
+  pointer-events: none;
+  transition: transform 0.8s ease;
+}
+.pillar:hover::after { transform: translateX(100%); }
+
+/* ───────────────────────────────────────────────────────────
+   MOBILE — comprehensive small-screen pass.
+   Stack everything that's side-by-side, shrink type, simplify
+   nav, drop section padding so content fills the viewport.
+   ─────────────────────────────────────────────────────────── */
+
+/* Tablet — 880px and below, lots of layouts already collapse here */
+@media (max-width: 880px) {
+  .site { padding: 0 18px; }
+  section { padding: 64px 0; }
+
+  nav.top { gap: 12px; padding: 0 18px; height: 56px; }
+  nav.top .links { display: none; }
+  nav.top .right { gap: 8px; }
+  nav.top .right .btn { display: none; }
+  nav.top .right .btn-rec { padding: 0 14px; height: 36px; }
+
+  .trial-banner { font-size: 11.5px; gap: 10px; padding: 0 12px; }
+  .trial-banner a { padding: 3px 10px; font-size: 11px; }
+
+  .hero { padding: 48px 0 24px; }
+  .hero-orb .orb { width: 240px !important; height: 240px !important; }
+  .hero h1 { letter-spacing: -0.03em; }
+  .hero-sub { font-size: 16px; }
+  .hero-cta { width: 100%; }
+  .hero-cta a { flex: 1; }
+  .hero-cta button { width: 100%; }
+
+  .statbar { padding: 22px 0; }
+  .statbar .stat .n { font-size: 30px; }
+  .statbar .stat .l { font-size: 10px; }
+
+  .sec-head { margin-bottom: 36px; }
+  .sec-head h2 { letter-spacing: -0.025em; }
+  .sec-head p { font-size: 15.5px; }
+
+  .feature h3 { font-size: 32px; letter-spacing: -0.022em; }
+  .feature p { font-size: 15.5px; }
+  .feat-visual { aspect-ratio: 1.4 / 1; border-radius: 18px; }
+
+  .pillar { padding: 22px 20px; }
+  .pillar .visual { height: 110px; }
+
+  .uc { padding: 18px; }
+
+  .pricing { gap: 14px; }
+  .plan { padding: 26px; }
+  .plan .price { font-size: 40px; }
+
+  .final { padding: 64px 22px; border-radius: 22px; }
+
+  .foot-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .foot-inner .links { margin-left: 0; flex-wrap: wrap; gap: 14px; }
+}
+
+/* Phone — 560px and below */
+@media (max-width: 560px) {
+  .site { padding: 0 16px; }
+  section { padding: 48px 0; }
+
+  nav.top { height: 52px; padding: 0 16px; }
+  nav.top .brand { font-size: 15px; }
+
+  .trial-banner {
+    font-size: 11px;
+    flex-wrap: wrap; padding: 6px 10px; height: auto; min-height: 36px;
+  }
+
+  .hero { padding: 32px 0 16px; gap: 24px; }
+  .hero-orb .orb { width: 200px !important; height: 200px !important; }
+  .hero h1 { font-size: 44px; }
+  .hero-sub { font-size: 15px; }
+  .hero-meta { font-size: 10px; gap: 12px; }
+  /* The tail copy ("Every feature unlocked · No card.") is redundant
+     with the trial banner directly above on phones. Drop it. */
+  .hero .eyebrow .tail { display: none; }
+  .hero .eyebrow { padding: 5px 10px; font-size: 10.5px; gap: 8px; }
+
+  .hero-cta { flex-direction: column; align-items: stretch; }
+  .hero-cta a { flex: initial; width: 100%; }
+  .hero-cta button { height: 50px !important; font-size: 14px !important; }
+  .btn-xl { height: 50px; padding: 0 18px; font-size: 14px; }
+
+  .sec-head { margin-bottom: 28px; }
+  .sec-head h2 { font-size: 28px; }
+  .sec-head p { font-size: 14.5px; }
+
+  .feature { gap: 24px; }
+  .feature h3 { font-size: 26px; }
+  .feature p { font-size: 14.5px; }
+  .feature ul li { font-size: 13.5px; }
+  .feat-visual { aspect-ratio: 1.3 / 1; border-radius: 16px; }
+
+  .pillars { gap: 12px; }
+  .pillar { padding: 20px 18px; }
+  .pillar h5 { font-size: 17px; }
+  .pillar p { font-size: 13.5px; }
+
+  .compat { gap: 8px; }
+  .compat-item { padding: 16px 8px; gap: 8px; }
+  .compat-item .glyph { width: 32px; height: 32px; }
+  .compat-item .nm { font-size: 12px; }
+  .compat-item .sub { font-size: 10px; }
+
+  .quotes { gap: 12px; }
+  .q { padding: 22px; }
+  .q.big blockquote { font-size: 18px; }
+  .q blockquote { font-size: 14.5px; }
+
+  .pricing { grid-template-columns: 1fr; }
+  .plan { padding: 24px; }
+  .plan .price { font-size: 38px; }
+
+  .faq-item { padding: 16px 18px; }
+  .faq-item h6 { font-size: 14px; }
+  .faq-item p { font-size: 13px; }
+
+  .final { padding: 56px 18px; border-radius: 18px; }
+  .final h2 { font-size: 34px; }
+  .final p { font-size: 15px; }
+
+  .foot-inner { padding-top: 22px; font-size: 11.5px; }
+}
+
+/* Very small — narrow phones */
+@media (max-width: 380px) {
+  .hero h1 { font-size: 38px; }
+  .sec-head h2 { font-size: 26px; }
+  .compat { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Mobile polish — applied across all phone sizes ──────────────── */
+@media (max-width: 880px) {
+  /* Stop horizontal overflow on phones: no element may push wider than
+     the viewport. Required because some 3D-hover transforms and the
+     ticker's translateX both leak past the page edge otherwise. */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+
+  /* 3D tilts on hover are nice on mac trackpads — useless and laggy on
+     touch. Disable them so taps feel snappy. */
+  .pillar:hover, .uc:hover, .q:hover, .compat-item:hover,
+  .faq-item:hover, .plan:hover, .feat-visual:hover,
+  .showcase-frame:hover {
+    transform: none;
+  }
+  .plan, .pillar, .uc, .q, .feat-visual, .faq-item, .compat-item,
+  .showcase-frame { transform: none !important; transform-style: flat; }
+
+  /* Showcase: tighter side padding, smaller glow so it doesn't feel
+     overwhelming on a phone. */
+  #showcase { padding: 32px 0; }
+  .showcase-frame img {
+    filter:
+      drop-shadow(0 0 24px oklch(0.62 0.22 258 / 0.35))
+      drop-shadow(0 0 50px oklch(0.55 0.22 245 / 0.25));
+    border-radius: 10px;
+  }
+
+  /* Boot loader smaller on phones. */
+  .boot-mark { width: 64px; height: 64px; }
+  .boot-name { font-size: 16px; }
+  .boot-bar { width: 110px; }
+
+  /* Footer stacks tighter on phones — no orphan chunks. */
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 28px 16px; }
+  .foot-col:first-child { grid-column: 1 / -1; }
+  .foot-tagline { max-width: none; }
+  .foot-bottom { font-size: 11.5px; gap: 10px; }
+  .foot-bottom-links { gap: 14px; }
+}
+
+@media (max-width: 560px) {
+  /* Trial banner can be a real eyesore if it doesn't wrap clean. */
+  .trial-banner {
+    padding: 8px 12px; gap: 8px;
+    flex-wrap: wrap; justify-content: center;
+    line-height: 1.4;
+  }
+  .trial-banner a { padding: 4px 10px; font-size: 11px; }
+
+  /* Stat strip — 4 cols at this width is too tight. Go to 2x2. */
+  .statbar { grid-template-columns: repeat(2, 1fr); padding: 18px 0; }
+  .statbar .stat { padding: 12px 8px; border-right: 0; }
+  .statbar .stat:nth-child(odd) { border-right: 0.5px solid var(--line); }
+  .statbar .stat:nth-child(-n+2) { border-bottom: 0.5px solid var(--line); }
+
+  /* Showcase: pull it edge-to-edge for max screenshot real estate. */
+  #showcase { padding: 24px 0 32px; }
+  .showcase-frame { margin: 0 -16px; max-width: none; }
+  .showcase-frame img { border-radius: 8px; }
+
+  /* Ticker spacing tighter for narrower screens. */
+  .ticker-track { gap: 24px; padding-left: 18px; font-size: 11.5px; }
+  .ticker-track .tk b { font-size: 11px; }
+  .ticker-track .tk::after { margin-left: 24px; }
+
+  /* Pricing card padding tightened. */
+  .plan { padding: 22px 20px; }
+  .plan h3 { font-size: 18px; }
+  .plan .price { font-size: 36px; }
+  .plan ul li { font-size: 13.5px; }
+
+  /* FAQ — two-line headings shouldn't crowd against the toggle. */
+  .faq-item { padding: 14px 16px; }
+
+  /* Final CTA padding pulled in. */
+  .final { padding: 48px 16px; }
+  .final h2 { font-size: 30px; }
+
+  /* Footer social row spacing on phones. */
+  .foot-socials { gap: 8px; }
+  .foot-socials a { width: 38px; height: 38px; }
+}
+
+@media (max-width: 380px) {
+  /* Tiny iPhone SE / older Android. */
+  .trial-banner { font-size: 10.5px; }
+  .trial-banner a { padding: 3px 8px; font-size: 10.5px; }
+  .hero-meta { font-size: 9.5px; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .plan { padding: 20px 18px; }
+  .final h2 { font-size: 26px; }
+}
+
+/* ── Boot loader ─────────────────────────────────────────────────
+   A full-bleed overlay with the cyan dot logo. Fades out once the
+   page has fully loaded (window.load — fires after images, fonts,
+   stylesheets are done). There's also a min-display time so fast
+   loads don't make it "flash" briefly. */
+#boot {
+  position: fixed;
+  /* Negative inset pushes the loader BEHIND iOS Safari's safe-area
+     regions (status bar, home indicator, URL bar). With viewport-fit=cover
+     in the meta and these negative offsets, the gradient paints all the
+     way to the physical edges — no horizontal seam between iOS chrome
+     and the page. */
+  top: calc(0px - env(safe-area-inset-top));
+  bottom: calc(0px - env(safe-area-inset-bottom));
+  left: calc(0px - env(safe-area-inset-left));
+  right: calc(0px - env(safe-area-inset-right));
+  /* Belt-and-braces sizing for mobile Safari, where 100vh includes the
+     space behind the dynamic URL bar and toolbar. We pin width to 100vw
+     and use 100lvh (large viewport height — viewport with all dynamic
+     UI retracted) so the loader is at least as tall as the FULL screen,
+     never leaving a gap at the bottom when the toolbar collapses. */
+  width: 100vw;
+  min-width: 100dvw;
+  min-height: 100lvh;
+  z-index: 9999;
+  display: grid; place-items: center;
+  /* Push inner content INTO the safe-area so the loader logo isn't
+     hidden behind the status bar / home indicator. */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  /* Match body::before so there's no jarring color jump. */
+  background:
+    radial-gradient(ellipse 1600px 1100px at 92% -5%,
+      oklch(0.45 0.22 263 / 0.65), transparent 65%),
+    radial-gradient(ellipse 1500px 1200px at -5% 105%,
+      oklch(0.34 0.18 263 / 0.62), transparent 65%),
+    radial-gradient(ellipse 1300px 900px at 50% 35%,
+      oklch(0.62 0.22 258 / 0.55), transparent 65%),
+    var(--bg-deep);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0s linear 0.7s;
+}
+#boot.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+.boot-stack {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  /* Slight upward fade-in once the script has had a tick to render. */
+  animation: bootIntro 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.boot-mark {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  position: relative;
+  /* Cyan glass dot — same gradient stops as the favicon, scaled up. */
+  background:
+    radial-gradient(circle at 35% 28%,
+      oklch(0.98 0.03 220) 0%,
+      oklch(0.78 0.18 240) 38%,
+      oklch(0.45 0.22 250) 80%,
+      oklch(0.18 0.18 260) 100%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.55),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.30),
+    0 0 60px oklch(0.78 0.18 245 / 0.55);
+  animation: bootPulse 1.8s ease-in-out infinite;
+}
+.boot-mark::before {
+  /* Big halo bloom that breathes with the dot. */
+  content: ""; position: absolute; inset: -90%;
+  border-radius: 50%; z-index: -1;
+  background: radial-gradient(circle,
+    oklch(0.78 0.18 245 / 0.45) 0%,
+    oklch(0.62 0.22 258 / 0.20) 35%,
+    transparent 70%);
+  animation: bootHalo 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.boot-name {
+  font-size: 18px; font-weight: 600; letter-spacing: -0.02em;
+  color: var(--fg);
+  opacity: 0.92;
+}
+.boot-bar {
+  width: 140px; height: 1.5px;
+  background: oklch(1 0 0 / 0.10); border-radius: 999px;
+  overflow: hidden; position: relative;
+}
+.boot-bar::after {
+  content: ""; position: absolute; inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg,
+    transparent,
+    oklch(0.78 0.18 245 / 0.95),
+    transparent);
+  animation: bootBar 1.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-radius: 999px;
+}
+@keyframes bootIntro {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bootPulse {
+  0%, 100% { transform: scale(1);    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.55), inset 0 0 0 0.5px oklch(1 0 0 / 0.30), 0 0 60px oklch(0.78 0.18 245 / 0.55); }
+  50%      { transform: scale(1.08); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.65), inset 0 0 0 0.5px oklch(1 0 0 / 0.45), 0 0 90px oklch(0.78 0.18 245 / 0.85); }
+}
+@keyframes bootHalo {
+  0%, 100% { opacity: 0.6; transform: scale(1);    }
+  50%      { opacity: 1.0; transform: scale(1.15); }
+}
+@keyframes bootBar {
+  from { transform: translateX(-110%); }
+  to   { transform: translateX(310%);  }
+}
+/* Hide page chrome until the loader fades — prevents the "weird half-loaded
+   look" the user mentioned. JS toggles `is-ready` on <html> after load.
+   Also locks the page from scrolling during boot — without this the user
+   can drift down on touch / wheel and the page would scroll under the
+   loader. */
+html:not(.is-ready),
+html:not(.is-ready) body {
+  overflow: hidden;
+  height: 100%;
+}
+html:not(.is-ready) body > *:not(#boot) {
+  opacity: 0;
+}
+html.is-ready body > *:not(#boot) {
+  opacity: 1;
+  transition: opacity 0.5s ease 0.15s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-mark, .boot-mark::before, .boot-bar::after { animation: none; }
+}
 </style>
 </head>
 <body>
-<p>Loading ClipCatch… <a href="ClipCatch%20Website.html">enter site</a></p>
+
+<!-- ── Boot loader ─────────────────────────────────────────────── -->
+<div id="boot" aria-hidden="true">
+  <div class="boot-stack">
+    <div class="boot-mark"></div>
+    <div class="boot-name">ClipCatch</div>
+    <div class="boot-bar"></div>
+  </div>
+</div>
+<script>
+  (function () {
+    // Disable the browser's scroll-restoration so a return visit doesn't
+    // drop the user mid-page. Once. We do NOT snap-to-top again after
+    // load — that's what was throwing the user back up when they
+    // scrolled during the boot fade.
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    // Capture an anchor (#how, #pricing) so we can honour it after the
+    // loader fades. We don't trigger the browser's automatic anchor
+    // jump during boot because the target's still hidden behind the
+    // loader and would scroll under it.
+    var initialHash = window.location.hash;
+
+    var bootedAt = Date.now();
+    var MIN_VISIBLE_MS = 1400; // page gets a beat to fully settle
+    function dismiss() {
+      var elapsed = Date.now() - bootedAt;
+      var wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
+      setTimeout(function () {
+        document.documentElement.classList.add('is-ready');
+        var boot = document.getElementById('boot');
+        if (boot) boot.classList.add('is-done');
+
+        // Honour a real anchor after the loader fades.
+        if (initialHash && initialHash !== '#top' && initialHash !== '#') {
+          var target = document.querySelector(initialHash);
+          if (target) {
+            setTimeout(function () {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 400);
+          }
+        }
+      }, wait);
+    }
+    if (document.readyState === 'complete') {
+      dismiss();
+    } else {
+      window.addEventListener('load', dismiss);
+      // Hard timeout fallback — never let the loader hang forever.
+      setTimeout(dismiss, 6000);
+    }
+  })();
+</script>
+
+<!-- ── Trial banner ───────────────────────────────────────────── -->
+<div class="trial-banner">
+  <b>3 days free</b> — every feature unlocked, no card
+  <a href="#download">Start trial →</a>
+</div>
+
+<!-- ── Nav ───────────────────────────────────────────────────── -->
+<nav class="top">
+  <a href="#top" class="brand">
+    <span class="brand-mark"></span>
+    ClipCatch
+  </a>
+  <div class="links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#compat">Works with</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="right">
+    <a href="#download" style="text-decoration:none;">
+      <button class="btn">Download</button>
+    </a>
+    <a href="https://buy.polar.sh/polar_cl_JOILziopdEaRrJgdWkZ5XtJck77gS9FcMaVHE3GNiio" style="text-decoration:none;">
+      <button class="btn-rec">Buy lifetime</button>
+    </a>
+  </div>
+</nav>
+
+<div class="site" id="top">
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <!-- Drifting cyan particles — populated by JS at the bottom. -->
+  <div class="particles" id="hero-particles" aria-hidden="true"></div>
+
+  <div class="copy">
+    <div class="eyebrow">
+      <span class="pill">FREE 3 DAYS</span>
+      <span class="tail">Every feature unlocked. No card.</span>
+    </div>
+    <h1>Never miss<br/>the <em>setup</em> again.</h1>
+    <p class="hero-sub">
+      ClipCatch keeps the last sixty seconds of your chart always ready to save.
+      You saw the tape rip — hit <b style="color:var(--fg);">save</b> and the move is on disk.
+      One app, every platform you trade on.
+    </p>
+    <div class="hero-cta">
+      <a href="#download" style="text-decoration:none;">
+        <button class="btn-rec btn-xl">
+          <span class="pulse"><span class="circ"></span></span>
+          Download for Mac
+        </button>
+      </a>
+      <a href="#pricing" style="text-decoration:none;">
+        <button class="btn btn-xl">See pricing</button>
+      </a>
+    </div>
+    <div class="hero-meta">
+      <span><b>macOS 13+</b></span>
+      <span><b>Apple Silicon &amp; Intel</b></span>
+      <span><b>2.7 MB download</b></span>
+      <span><b>3-day free trial</b></span>
+    </div>
+  </div>
+
+  <div class="hero-orb">
+    <div class="orb" id="hero-orb-el" style="width: 360px; height: 360px;">
+      <div class="orb-halo"></div>
+      <div class="orb-core">
+        <div class="orb-spec"></div>
+        <div class="orb-rim"></div>
+      </div>
+      <div class="orb-ring"></div>
+      <span class="orb-badge"><span class="dot"></span>Live · 60s</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Live ticker — markets the audience watches ──────────────── -->
+<div class="tickers" aria-hidden="true">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- ── Stat bar ──────────────────────────────────────────────── -->
+<section class="tight">
+  <div class="statbar reveal">
+    <div class="stat"><span class="n">&lt;3<small>%</small></span><span class="l">CPU at 4K · 60 fps</span></div>
+    <div class="stat"><span class="n">84<small>MB</small></span><span class="l">RAM with full buffer</span></div>
+    <div class="stat"><span class="n">0<small>ms</small></span><span class="l">Save → clip on disk</span></div>
+    <div class="stat"><span class="n">∞</span><span class="l">Clips · unlimited</span></div>
+  </div>
+</section>
+
+<!-- ── Showcase / app screenshot ─────────────────────────────── -->
+<section class="tight" id="showcase">
+  <div class="sec-head reveal">
+    <span class="eyebrow">The app, on day one</span>
+    <h2>Three tabs. Built for one thing.</h2>
+    <p>Recorder, Clips, Settings. No menus to dig through, no project files, no exports. Hit the hotkey, the clip is on disk.</p>
+  </div>
+
+  <div class="showcase-frame reveal">
+    <img src="assets/screen-recorder.png"
+         alt="ClipCatch Recorder window — sidebar with Recorder, Clips, Settings, License, About. Main area shows live preview, source chips, and a record button."
+         loading="eager"
+         decoding="async"
+         onload="this.classList.add('is-loaded')"/>
+    <div class="showcase-glow"></div>
+  </div>
+</section>
+
+<!-- ── How it works (three pillars) ──────────────────────────── -->
+<section id="how">
+  <div class="sec-head reveal">
+    <span class="eyebrow">How it works</span>
+    <h2>Three things. That's the whole app.</h2>
+    <p>No tutorial. No onboarding. Open it, pick what to record, trade.</p>
+  </div>
+
+  <div class="pillars reveal">
+    <div class="pillar">
+      <span class="num">01 · BACKGROUND</span>
+      <h5>It's quietly recording your chart.</h5>
+      <p>The last 60 seconds (or 3 min) live in RAM. Nothing on disk. Under 3% CPU on Apple Silicon. You forget it's there.</p>
+      <div class="visual">
+        <div style="position:absolute; inset:18px; display:flex; align-items:flex-end; gap:3px;">
+          <div style="height:35%; flex:1; background:oklch(0.30 0.10 258); border-radius:1px;"></div>
+          <div style="height:55%; flex:1; background:oklch(0.40 0.13 258); border-radius:1px;"></div>
+          <div style="height:48%; flex:1; background:oklch(0.36 0.11 258); border-radius:1px;"></div>
+          <div style="height:78%; flex:1; background:oklch(0.55 0.18 258); border-radius:1px;"></div>
+          <div style="height:64%; flex:1; background:oklch(0.46 0.15 258); border-radius:1px;"></div>
+          <div style="height:88%; flex:1; background:oklch(0.78 0.18 245); border-radius:1px; box-shadow: 0 0 12px var(--cyan-glow);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pillar">
+      <span class="num">02 · THE MOMENT</span>
+      <h5>The move prints. You save.</h5>
+      <p>Hit <b style="color:var(--fg);">Save 60s</b> — or let the Area Monitor auto-save when the newest candle moves hard. The clip is already rendered.</p>
+      <div class="visual">
+        <div style="position:absolute; inset:0; display:grid; place-items:center;">
+          <div style="display:flex; gap:10px; align-items:center; padding:10px 16px; border-radius:10px; background:oklch(0.10 0.04 258); box-shadow: inset 0 0 0 0.5px var(--line), 0 0 0 3px var(--cyan-soft);">
+            <div style="width:18px; height:18px; border-radius:5px; background:#fff; display:grid; place-items:center;">
+              <div style="width:8px; height:8px; border-radius:2px; background:var(--rec);"></div>
+            </div>
+            <span style="color:var(--fg); font-size:13px; font-weight:600;">Save 60s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pillar">
+      <span class="num">03 · KEEP TRADING</span>
+      <h5>Clip is on disk. Review at the close.</h5>
+      <p>MP4, H.264, named with the ticker and time. Open with anything. Drop in Notion, Discord, Journalytix — wherever your journal lives.</p>
+      <div class="visual">
+        <div style="position:absolute; inset:14px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; gap:8px; align-items:center; padding:7px 10px; border-radius:6px; background:oklch(0.10 0.04 258); box-shadow: inset 0 0 0 0.5px var(--line);">
+            <div style="width:22px; height:14px; border-radius:2px; background:repeating-linear-gradient(135deg, oklch(0.20 0.06 258) 0 3px, oklch(0.15 0.05 258) 3px 6px);"></div>
+            <div style="font-family:var(--mono); font-size:10.5px; color:var(--fg-mute);">ES_2026-04-23_10-42.mp4</div>
+            <span style="margin-left:auto; color:var(--fg-faint); font-family:var(--mono); font-size:10px;">00:58</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; padding:7px 10px; border-radius:6px; background:oklch(0.10 0.04 258); box-shadow: inset 0 0 0 0.5px var(--line);">
+            <div style="width:22px; height:14px; border-radius:2px; background:repeating-linear-gradient(135deg, oklch(0.20 0.06 258) 0 3px, oklch(0.15 0.05 258) 3px 6px);"></div>
+            <div style="font-family:var(--mono); font-size:10.5px; color:var(--fg-mute);">NQ_2026-04-23_10-04.mp4</div>
+            <span style="margin-left:auto; color:var(--fg-faint); font-family:var(--mono); font-size:10px;">00:22</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature: Rolling buffer ──────────────────────────────── -->
+<section id="features">
+  <div class="feature reveal">
+    <div class="copy">
+      <span class="eyebrow">The rolling buffer</span>
+      <h3>Always on.<br/>Never on disk.<br/>Until you say <em>so</em>.</h3>
+      <p>
+        ClipCatch keeps the last 60 seconds of your screen in memory — not files.
+        Storage stays clean. CPU stays cool.
+        And "wait, did anyone get that?" becomes: you did.
+      </p>
+      <ul>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>In-memory ring buffer. No ghost files in your Movies folder.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Save backwards — capture the move you already watched.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Under 3% CPU at 4K · runs silent next to your chart software.</span></li>
+      </ul>
+    </div>
+    <div class="feat-visual">
+      <div class="buf-tag"><span class="dot"></span>BUFFERING · 60 / 60</div>
+      <div class="buf-bars" id="buf-bars"></div>
+      <div class="buf-axis">
+        <span>-60s</span><span>-45s</span><span>-30s</span><span>-15s</span><span style="color: var(--cyan);">now</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature: Area monitor ────────────────────────────────── -->
+<section>
+  <div class="feature flip reveal">
+    <div class="copy">
+      <span class="eyebrow">Area monitor</span>
+      <h3>Draw a box.<br/>Walk away.<br/><em>Records itself.</em></h3>
+      <p>
+        Drag a rectangle over your P&amp;L tile, your boss bar, your fill notification.
+        ClipCatch watches the pixels. The instant they change, it's recording — no key,
+        no click, no missed move.
+      </p>
+      <ul>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Three sensitivity levels — quiet markets to fast tape.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Auto-stops a few seconds after the region settles.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Works against any platform's UI — Tradovate, NinjaTrader, TradingView.</span></li>
+      </ul>
+    </div>
+    <div class="feat-visual">
+      <div class="scan-frame">
+        <div class="scan-corner tl"></div>
+        <div class="scan-corner tr"></div>
+        <div class="scan-corner bl"></div>
+        <div class="scan-corner br"></div>
+        <div class="scan-line"></div>
+      </div>
+      <div class="buf-tag" style="background: oklch(0.06 0.025 258 / 0.78);">
+        <span class="dot" style="background:var(--match); box-shadow:0 0 8px var(--match-glow);"></span>ARMED · WATCHING
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature: Custom region ───────────────────────────────── -->
+<section>
+  <div class="feature reveal">
+    <div class="copy">
+      <span class="eyebrow">Custom region</span>
+      <h3>Like ⌘⇧5 — but it was<br/><em>already recording</em>.</h3>
+      <p>
+        Pick any rectangle on screen with the picker, the way you'd take a screenshot.
+        ClipCatch captures only that. Sharper output, smaller files, no UI chrome —
+        just the pixels you actually want to keep.
+      </p>
+      <ul>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Pixel-exact crop. Native resolution, no rescaling.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Works with the rolling buffer — region recordings are also retroactive.</span></li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg><span>Save just the chart, just the DOM, just the P&amp;L. Whatever you need.</span></li>
+      </ul>
+    </div>
+    <div class="feat-visual">
+      <div class="region-canvas">
+        <div class="region-rect"></div>
+        <div class="region-cursor"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Use cases ────────────────────────────────────────────── -->
+<section>
+  <div class="sec-head reveal">
+    <span class="eyebrow">Why traders use it</span>
+    <h2>Four workflows.<br/>One keyboard shortcut away.</h2>
+  </div>
+  <div class="usecases reveal">
+    <div class="uc">
+      <span class="tag">JOURNAL</span>
+      <h4>Stop explaining trades in words.</h4>
+      <p>A 45-second clip of the actual bar-by-bar print is worth ten paragraphs in your trade journal. Drop it in Notion or Edgewonk and move on.</p>
+    </div>
+    <div class="uc">
+      <span class="tag">COACH</span>
+      <h4>Show your mentor exactly what you saw.</h4>
+      <p>Trade review over Discord or Zoom. Paste a clip, get notes back. Better than chart screenshots — they can see the build-up.</p>
+    </div>
+    <div class="uc">
+      <span class="tag">DISPUTE</span>
+      <h4>Proof when the fill was wrong.</h4>
+      <p>When your DOM shows one thing and your broker says another, a clip of the ladder at the exact millisecond is not a debate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Compatibility ────────────────────────────────────────── -->
+<section id="compat">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Works with everything</span>
+    <h2>Your platform,<br/>your charts, your way.</h2>
+    <p>ClipCatch records <b style="color:var(--fg);">what's on screen</b> — so it works with every trading platform, period. Here are the ones our beta testers use most.</p>
+  </div>
+
+  <div class="compat reveal">
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 2v12M5 4.5h-1.5M5 4.5h1.5M5 11.5h-1.5M5 11.5h1.5"/><path d="M11 3v10M11 5h-1.5M11 5h1.5M11 10h-1.5M11 10h1.5"/></svg></div>
+      <div class="nm">TradingView</div>
+      <div class="sub">Web · Desktop</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 5L14 8l-4.4 2L8 15l-1.6-5L2 8l4.4-2z"/></svg></div>
+      <div class="nm">NinjaTrader</div>
+      <div class="sub">Windows</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M1 13l4-7 3 4 3-6 4 9z"/></svg></div>
+      <div class="nm">Sierra Chart</div>
+      <div class="sub">Windows</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg></div>
+      <div class="nm">Tradovate</div>
+      <div class="sub">Web</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 8h3l2-4 2 8 2-4h3"/></svg></div>
+      <div class="nm">Rithmic</div>
+      <div class="sub">Native</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V2h6v2"/></svg></div>
+      <div class="nm">TWS · IBKR</div>
+      <div class="sub">Desktop</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12V4l6 4 6-4v8"/></svg></div>
+      <div class="nm">ProjectX</div>
+      <div class="sub">Web</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l5 3v4l-5 5-5-5V5z"/></svg></div>
+      <div class="nm">Tradesea</div>
+      <div class="sub">Web</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg></div>
+      <div class="nm">MetaTrader 5</div>
+      <div class="sub">Web · Desktop</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l3-6 4 8 3-5"/></svg></div>
+      <div class="nm">cTrader</div>
+      <div class="sub">Desktop</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h4"/></svg></div>
+      <div class="nm">ThinkOrSwim</div>
+      <div class="sub">Desktop</div>
+    </div>
+    <div class="compat-item">
+      <div class="glyph"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg></div>
+      <div class="nm">Anything else</div>
+      <div class="sub">…it's just pixels</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quotes ──────────────────────────────────────────────── -->
+<section>
+  <div class="sec-head reveal">
+    <span class="eyebrow">Used in the trenches</span>
+    <h2>Quiet app. Loud endorsements.</h2>
+  </div>
+
+  <div class="quotes reveal">
+    <div class="q big">
+      <blockquote>"I've screenshotted ten thousand charts. Every single one was the wrong moment. This is the first tool that catches the <em>actual</em> print."</blockquote>
+      <div class="who">
+        <div class="av">MK</div>
+        <div><div class="nm">Mika K.</div><div class="meta">ES · funded · 6Y</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"Set the area over my P&amp;L, let it auto-record. I have a library of every stop-out I ever took. Ugly, but it made me a better trader."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.16 155), oklch(0.40 0.18 175));">DR</div>
+        <div><div class="nm">Daniel R.</div><div class="meta">NQ · prop</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"Replaced OBS, Loom, and QuickTime on my rig. Laptop fan finally shuts up."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 75), oklch(0.55 0.22 45));">JT</div>
+        <div><div class="nm">Jamal T.</div><div class="meta">SPX · discretionary</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"My journal used to be screenshots and bad memory. Now it's actual replays of the entry. Game changer for review."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.72 0.18 305), oklch(0.48 0.22 285));">SV</div>
+        <div><div class="nm">Sofia V.</div><div class="meta">CL · swing</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"Bound the save key to my MX side button. Three weeks in, I've never missed a fill again. Worth ten times the price."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.74 0.18 195), oklch(0.50 0.22 215));">RC</div>
+        <div><div class="nm">Ryan C.</div><div class="meta">CME · scalper</div></div>
+      </div>
+    </div>
+    <div class="q">
+      <blockquote>"I run two charts and a DOM. ClipCatch's footprint is genuinely invisible — couldn't say that about Loom."</blockquote>
+      <div class="who">
+        <div class="av" style="background: linear-gradient(135deg, oklch(0.78 0.18 25), oklch(0.55 0.22 5));">AH</div>
+        <div><div class="nm">Aria H.</div><div class="meta">FX · 4Y</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ─────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Pricing</span>
+    <h2>Simple pricing.<br/>Serious tool.</h2>
+    <p>Every plan starts with <b style="color:var(--fg);">3 days free</b> — no credit card, no account, every feature unlocked. Pay when you've decided it's worth keeping.</p>
+  </div>
+
+  <div class="pricing reveal">
+    <div class="plan">
+      <h3>Monthly</h3>
+      <div>
+        <div class="price">$9.99</div>
+        <div class="terms">per month · cancel anytime</div>
+      </div>
+      <ul>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Unlimited 60-second saves</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Area-monitor auto-record</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Global save hotkey</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Works on 2 Macs</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Updates while subscribed</li>
+      </ul>
+      <a href="https://buy.polar.sh/polar_cl_8kSarE1enwLX3NGOn9ha3VAMIMVRARowD8t6d0jMccS" style="text-decoration:none; margin-top:auto;">
+        <button class="btn" style="width:100%; height:48px; font-size:14px; border-radius:12px;">Start monthly</button>
+      </a>
+    </div>
+
+    <div class="plan featured">
+      <span class="badge">BEST VALUE</span>
+      <h3>Lifetime</h3>
+      <div>
+        <div class="price">$99.99</div>
+        <div class="terms">one-time · pays back in 10 months</div>
+      </div>
+      <ul>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Everything in Monthly</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>All future updates forever</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>No renewal, no surprises</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Priority email support</li>
+        <li><svg class="i" viewBox="0 0 20 20"><path d="M4 10l4 4 8-8"/></svg>Keeps working if we ever shut down</li>
+      </ul>
+      <a href="https://buy.polar.sh/polar_cl_JOILziopdEaRrJgdWkZ5XtJck77gS9FcMaVHE3GNiio" style="text-decoration:none; margin-top:auto;">
+        <button class="btn-rec" style="width:100%; height:48px; font-size:14px; border-radius:12px;">
+          <span class="pulse"><span class="circ"></span></span>
+          Buy lifetime
+        </button>
+      </a>
+    </div>
+  </div>
+
+  <p style="text-align:center; color:var(--fg-faint); font-size:12px; margin-top:24px;">
+    Both plans · 2 Macs per licence · Secure checkout via Polar
+  </p>
+</section>
+
+<!-- ── FAQ ─────────────────────────────────────────────────── -->
+<section id="faq">
+  <div class="sec-head reveal">
+    <span class="eyebrow">FAQ</span>
+    <h2>Answers.</h2>
+  </div>
+  <div class="faq reveal">
+    <div class="faq-item"><h6>How does the 3-day trial work?</h6><p>Download, install, record. No card, no account, no friction. After 3 days the app asks for a licence key before it'll record again. Saved clips stay in your Movies folder regardless — they're just MP4s, they never needed the app.</p></div>
+    <div class="faq-item"><h6>Can I use one licence on multiple Macs?</h6><p>Yes. Every licence covers 2 Macs — work desk + home setup is the typical split. You can free up a slot from Settings → License if you sell or replace a machine.</p></div>
+    <div class="faq-item"><h6>Monthly or lifetime — which should I pick?</h6><p>Lifetime pays itself back in 10 months and never renews. Pick Monthly if you want to feel it out, Lifetime if you already know you're keeping it. You can upgrade from Monthly to Lifetime anytime and we'll credit you what you already paid.</p></div>
+    <div class="faq-item"><h6>Does it send data anywhere?</h6><p>No telemetry. No analytics. No crash reporting. Licence checks go to Polar.sh once a day, that's it. Your recordings never leave your machine unless you share them yourself.</p></div>
+    <div class="faq-item"><h6>Does it work with my prop firm's platform?</h6><p>If the platform renders on your screen, ClipCatch records it. Every firm-specific build of NinjaTrader, Tradovate, Rithmic, ProjectX, TradingView, TWS — they all just render pixels, ClipCatch catches them.</p></div>
+    <div class="faq-item"><h6>What if I change my mind?</h6><p>That's exactly why we offer a 3-day free trial — every feature unlocked, no card required. Try it on your own setup before you pay. We don't process refunds after purchase, so please use the trial first.</p></div>
+    <div class="faq-item"><h6>How do I cancel my subscription?</h6><p>Open the email Polar sent you at checkout — there's a "Manage subscription" link that takes you straight to your customer portal. From there, hit <b style="color:var(--fg);">Cancel subscription</b> and you're done. Cancellation stops future renewals immediately; you keep access until the end of the period you've already paid for. Lost the email? Email <a href="mailto:support@clipcatch.app">support@clipcatch.app</a> with the address you used at checkout and we'll send the link.</p></div>
+    <div class="faq-item"><h6>What about audio — mentor calls, squawks?</h6><p>System audio + mic capture are both supported with built-in AGC. You decide per-recording whether to include them in Settings → Camera &amp; Mic.</p></div>
+    <div class="faq-item"><h6>Windows version?</h6><p>Not yet. We prototyped one but the platform's capture APIs are messier than macOS — rather than ship something half-baked we're focusing Mac-only until the Mac build is exactly where we want it.</p></div>
+  </div>
+</section>
+
+<!-- ── Final CTA ───────────────────────────────────────────── -->
+<section id="download">
+  <div class="final reveal">
+    <span class="brand-mark lg" style="margin: 0 auto 24px; display: block;"></span>
+    <h2>3 days free.<br/>No strings.</h2>
+    <p>Try every feature, no credit card, no account. If ClipCatch hasn't paid for itself in three sessions, keep the clips and walk.</p>
+    <div class="hero-cta" style="justify-content:center;">
+      <a href="/downloads/ClipCatch-1.0.dmg" style="text-decoration:none;">
+        <button class="btn-rec btn-xl">
+          <span class="pulse"><span class="circ"></span></span>
+          Download for Mac
+        </button>
+      </a>
+      <a href="#pricing" style="text-decoration:none;">
+        <button class="btn btn-xl">See pricing</button>
+      </a>
+    </div>
+    <div class="meta">macOS 13+ · Apple Silicon &amp; Intel · 2.7 MB download</div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a href="#top" class="foot-brand"><span class="brand-mark sm"></span>ClipCatch</a>
+        <p class="foot-tagline">Always-on, 60-second screen rewind for traders. Hit the hotkey, get the move on disk.</p>
+        <div class="foot-socials">
+          <a href="https://x.com/clipcatchrec" target="_blank" rel="noopener" aria-label="ClipCatch on X">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://discord.gg/byrXQW9xbk" target="_blank" rel="noopener" aria-label="ClipCatch on Discord">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.078.038 13.7 13.7 0 0 0-.617 1.247 18.27 18.27 0 0 0-5.487 0 12.7 12.7 0 0 0-.626-1.247.07.07 0 0 0-.078-.038A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.08.08 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.07.07 0 0 0 .084-.027 14.07 14.07 0 0 0 1.226-1.994.07.07 0 0 0-.04-.098 13.1 13.1 0 0 1-1.872-.892.07.07 0 0 1-.007-.118c.126-.094.252-.192.371-.291a.07.07 0 0 1 .074-.01c3.927 1.793 8.18 1.793 12.062 0a.07.07 0 0 1 .074.009c.12.099.246.198.372.292a.07.07 0 0 1-.006.118c-.598.349-1.22.645-1.873.891a.07.07 0 0 0-.04.099c.36.698.772 1.362 1.225 1.994a.07.07 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.08.08 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@clipcatch.app" target="_blank" rel="noopener" aria-label="ClipCatch on TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.16A8.16 8.16 0 0 0 21.5 9.4V6a4.85 4.85 0 0 1-1.91-.36z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#compat">Platforms</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="downloads/ClipCatch-1.0.dmg">Download</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="mailto:support@clipcatch.app">support@clipcatch.app</a></li>
+          <li><a href="https://discord.gg/byrXQW9xbk" target="_blank" rel="noopener">Discord community</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="imprint.html">Imprint</a></li>
+          <li><a href="privacy.html">Privacy policy</a></li>
+          <li><a href="terms.html">Terms of service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2026 ClipCatch · Built by traders.</span>
+      <div class="foot-bottom-links">
+        <a href="imprint.html">Imprint</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="mailto:support@clipcatch.app">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /.site -->
+
+<script>
+// Tiny reveal-on-scroll observer. Adds `.in` to trigger the 3D rise,
+// then `.done` after the transition finishes so the browser can stop
+// paying the will-change layer cost.
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) {
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+      // Match the longest transition duration in the .reveal rule.
+      setTimeout(() => e.target.classList.add("done"), 850);
+    }
+  }
+}, { rootMargin: "0px 0px -10% 0px" });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+// Buffer-bars feature visual — generate 20 randomised bars with the
+// last one highlighted as "live".
+(function() {
+  const root = document.getElementById("buf-bars");
+  if (!root) return;
+  const N = 20;
+  const heights = Array.from({length: N}, (_, i) => {
+    const t = i / (N - 1);
+    const base = 0.35 + 0.55 * Math.abs(Math.sin(t * Math.PI * 2.5));
+    return Math.max(0.20, Math.min(0.95, base + (Math.random() - 0.5) * 0.18));
+  });
+  for (let i = 0; i < N; i++) {
+    const span = document.createElement("span");
+    span.style.height = (heights[i] * 100) + "%";
+    if (i === N - 1) span.className = "live";
+    root.appendChild(span);
+  }
+})();
+
+/* ─── Feature ticker — slim dark strip running edge-to-edge with the
+   feature list of ClipCatch in monospace. Two copies of the items
+   are rendered side-by-side so the CSS keyframe can translate by
+   -50% without a jump. */
+(function() {
+  const track = document.getElementById("ticker-track");
+  if (!track) return;
+  const items = [
+    { sym: "BUFFER",   px: "60s rolling",       hint: "always-on" },
+    { sym: "HOTKEY",   px: "Global save",       hint: "any app"   },
+    { sym: "AREA",     px: "Auto-record",       hint: "P&L watch" },
+    { sym: "DISPLAY",  px: "Full screen",       hint: "4K · 60"   },
+    { sym: "WINDOW",   px: "App capture",       hint: "any size"  },
+    { sym: "REGION",   px: "Custom rect",       hint: "pixel-perfect" },
+    { sym: "MIC",      px: "AGC",               hint: "noise-gated"   },
+    { sym: "NAMING",   px: "Auto title",        hint: "ticker · time" },
+    { sym: "MULTI",    px: "Multi-display",     hint: "any monitor"   },
+    { sym: "GPU",      px: "Hardware encode",   hint: "<3% CPU"       },
+    { sym: "PRIVACY",  px: "Local-only",        hint: "no cloud"      },
+    { sym: "TRIAL",    px: "3 days free",       hint: "no card"       }
+  ];
+  function renderItem(it) {
+    return `<span class="tk"><span class="px">${it.px}</span><i>${it.hint}</i></span>`;
+  }
+  // Two copies so the loop is seamless when CSS does translateX(-50%).
+  track.innerHTML = items.map(renderItem).join("") + items.map(renderItem).join("");
+})();
+
+/* ─── Floating particles in the hero — fewer dots, slower drift,
+   skip on reduced-motion + small screens for free perf. */
+(function() {
+  const root = document.getElementById("hero-particles");
+  if (!root) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.innerWidth < 720) return;   // skip on phones — saves a lot of CPU
+  const N = 8;
+  for (let i = 0; i < N; i++) {
+    const el = document.createElement("div");
+    el.className = "particle";
+    const size = 2 + Math.random() * 2;
+    const left = Math.random() * 100;
+    const dur = 14 + Math.random() * 8;
+    const delay = -Math.random() * dur;
+    el.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${left}%; bottom: -10px;
+      animation-duration: ${dur}s;
+      animation-delay: ${delay}s;
+      opacity: ${0.45 + Math.random() * 0.35};
+    `;
+    root.appendChild(el);
+  }
+})();
+
+/* ─── Stat-strip counter — when the strip enters the viewport, count
+   each number up from zero to the target. Pure JS, no library. */
+(function() {
+  const stats = document.querySelectorAll(".statbar .stat .n");
+  if (!stats.length) return;
+  function parseTarget(el) {
+    const raw = el.textContent.trim();
+    if (raw === "∞") return null;
+    const n = parseFloat(raw.replace(/[^0-9.]/g, ""));
+    return isNaN(n) ? null : { value: n, label: raw };
+  }
+  const targets = Array.from(stats).map(el => ({ el, target: parseTarget(el) }));
+  targets.forEach(t => {
+    if (t.target) t.el.textContent = "0" + (t.target.label.replace(/^[0-9.]+/, "").charAt(0) === "<" ? "" : "");
+  });
+  function animate(t) {
+    if (!t.target) return;
+    const dur = 1400, t0 = performance.now();
+    function step(now) {
+      const k = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      const cur = t.target.value * eased;
+      const suffix = t.target.label.replace(/^.*?(\D*)$/, "$1");
+      const isInt = !t.target.label.includes(".");
+      const num = isInt ? Math.round(cur) : cur.toFixed(0);
+      // Reattach the original prefix (e.g. "<") and inner small suffix.
+      const inner = t.el.querySelector("small");
+      const innerHTML = inner ? inner.outerHTML : "";
+      const prefix = t.target.label.startsWith("<") ? "<" : "";
+      t.el.innerHTML = prefix + num + innerHTML;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  const counterIO = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        targets.forEach(animate);
+        counterIO.disconnect();
+        break;
+      }
+    }
+  }, { rootMargin: "0px 0px -10% 0px" });
+  if (targets[0]) counterIO.observe(targets[0].el.closest(".statbar"));
+})();
+
+/* ─── Hero orb mouse-tracking 3D tilt — follow the cursor with a
+   small Y/X rotation so the orb feels like a real lit object you
+   could grab. Transform-only, GPU-accelerated, throttled to one
+   update per animation frame so it never stutters. */
+(function() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.innerWidth < 720) return;
+  const orb = document.getElementById("hero-orb-el");
+  if (!orb) return;
+
+  // Keep the parent's perspective context so the rotation feels 3D.
+  const wrap = orb.parentElement;
+  if (wrap) wrap.style.perspective = "900px";
+
+  let scheduled = false;
+  let targetX = 0, targetY = 0;
+  let currentX = 0, currentY = 0;
+
+  function onMove(e) {
+    const r = orb.getBoundingClientRect();
+    const cx = r.left + r.width  / 2;
+    const cy = r.top  + r.height / 2;
+    // Distance from orb center, normalised by half the viewport.
+    const dx = (e.clientX - cx) / (window.innerWidth  / 2);
+    const dy = (e.clientY - cy) / (window.innerHeight / 2);
+    // Cap the angle so the effect stays subtle (max ±10°).
+    targetY =  Math.max(-1, Math.min(1, dx)) * 10;
+    targetX = -Math.max(-1, Math.min(1, dy)) * 8;
+    if (!scheduled) { scheduled = true; requestAnimationFrame(tick); }
+  }
+
+  function tick() {
+    scheduled = false;
+    // Ease toward the target so motion is smooth, not jerky.
+    currentX += (targetX - currentX) * 0.12;
+    currentY += (targetY - currentY) * 0.12;
+    orb.style.transform =
+      `rotateX(${currentX.toFixed(2)}deg) rotateY(${currentY.toFixed(2)}deg)`;
+    if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
+      requestAnimationFrame(tick);
+    }
+  }
+
+  document.addEventListener("mousemove", onMove, { passive: true });
+
+  // Reset the orb when the cursor leaves the window.
+  document.addEventListener("mouseleave", () => {
+    targetX = 0; targetY = 0;
+    if (!scheduled) { scheduled = true; requestAnimationFrame(tick); }
+  });
+})();
+</script>
+
 </body>
 </html>

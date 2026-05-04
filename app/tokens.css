@@ -1,39 +1,57 @@
 /* ─────────────────────────────────────────────────────────────────
    ClipCatch · design tokens + shared utilities
-   Dark-first, Linear / Raycast minimalism. Blue (accent from the
-   logo) as primary, red as "recording", green as "matching / live".
+   Deep-space background, glass cards, electric cyan accents.
+   Matches the new in-app aesthetic — Hello-style sphere energy with
+   ClipCatch's blue palette, restrained but intensely saturated where
+   color appears.
    ───────────────────────────────────────────────────────────────── */
 
 :root,
 [data-theme="dark"] {
   /* ── Surfaces ───────────────────────────────────────── */
-  --bg:         oklch(0.085 0.008 260);
-  --bg-card:    oklch(0.135 0.008 260);
-  --bg-elev:    oklch(0.175 0.008 260);
-  --bg-inset:   oklch(0.110 0.008 260);
+  /* Deep saturated navy, identical to the app's D1AmbientBackground
+     base. Reads as a glowing blue space, not near-black. */
+  --bg:         oklch(0.110 0.050 263);
+  --bg-deep:    oklch(0.100 0.045 268);
+  --bg-inset:   oklch(0.085 0.040 263);
+  /* Translucent floating surfaces — the ambient glow behind them
+     bleeds through subtly, so they read as "lit from within". */
+  --bg-card:    oklch(0.135 0.055 258 / 0.72);
+  --bg-elev:    oklch(0.165 0.060 258 / 0.85);
 
   /* ── Text ───────────────────────────────────────────── */
-  --fg:         oklch(0.970 0.003 260);
-  --fg-mute:    oklch(0.720 0.010 260);
-  --fg-faint:   oklch(0.540 0.010 260);
-  --fg-dim:     oklch(0.380 0.010 260);
+  --fg:         oklch(0.978 0.006 258);
+  --fg-mute:    oklch(0.730 0.015 258);
+  --fg-faint:   oklch(0.510 0.018 258);
+  --fg-dim:     oklch(0.360 0.018 258);
 
   /* ── Lines / hairline borders ───────────────────────── */
-  --line:       oklch(1 0 0 / 0.09);
-  --line-soft:  oklch(1 0 0 / 0.05);
+  --line:       oklch(1 0 0 / 0.07);
+  --line-soft:  oklch(1 0 0 / 0.04);
+  --line-glow:  oklch(0.78 0.18 245 / 0.22);
 
-  /* ── Accent — blue (brand / record / primary CTA) ───── */
-  --rec:        oklch(0.655 0.205 258);
-  --rec-soft:   oklch(0.655 0.205 258 / 0.14);
-  --rec-glow:   oklch(0.655 0.205 258 / 0.55);
+  /* ── Accent — electric cyan (matches the M3-2 logo dot) ─ */
+  --cyan:       oklch(0.78 0.18 245);
+  --cyan-soft:  oklch(0.78 0.18 245 / 0.16);
+  --cyan-glow:  oklch(0.78 0.18 245 / 0.55);
 
-  /* ── Accent — green (matching / live / success) ─────── */
-  --match:      oklch(0.740 0.150 155);
-  --match-soft: oklch(0.740 0.150 155 / 0.14);
+  /* ── Primary CTA — deep electric blue ─────────────────── */
+  --rec:        oklch(0.62 0.22 258);
+  --rec-soft:   oklch(0.62 0.22 258 / 0.16);
+  --rec-glow:   oklch(0.62 0.22 258 / 0.65);
 
-  /* ── Accent — red (alert / divergent) ───────────────── */
-  --alert:      oklch(0.680 0.220 25);
-  --alert-soft: oklch(0.680 0.220 25 / 0.16);
+  /* ── Acid green — live / matching ─────────────────────── */
+  --match:      oklch(0.84 0.20 145);
+  --match-soft: oklch(0.84 0.20 145 / 0.16);
+  --match-glow: oklch(0.84 0.20 145 / 0.45);
+
+  /* ── Coral red — alert / divergent ────────────────────── */
+  --alert:      oklch(0.70 0.22 22);
+  --alert-soft: oklch(0.70 0.22 22 / 0.16);
+
+  /* ── Deep purple — secondary accent ───────────────────── */
+  --purple:     oklch(0.55 0.22 290);
+  --purple-soft:oklch(0.55 0.22 290 / 0.16);
 
   /* ── Type ───────────────────────────────────────────── */
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
@@ -45,7 +63,7 @@
 html { color-scheme: dark; }
 html, body {
   margin: 0; padding: 0;
-  background: var(--bg);
+  background: var(--bg-deep);
   color: var(--fg);
   font-family: var(--sans);
   font-size: 15px;
@@ -56,17 +74,49 @@ html, body {
   text-rendering: optimizeLegibility;
   font-feature-settings: "ss01", "ss02", "cv11";
 }
-body { min-height: 100vh; }
+body {
+  min-height: 100vh;
+  /* Solid deep-navy base — flat color, cheap. */
+  background: var(--bg-deep);
+}
+
+/* Ambient gradient lives on a fixed pseudo-element behind everything.
+   Painting once + staying in place is dramatically cheaper than
+   `background-attachment: fixed`, which forces a full re-paint of
+   the gradient on every scroll frame.
+
+   Gradient values + sizes tuned to feel like the app's actual
+   D1AmbientBackground rather than going near-black at the edges:
+   bigger ellipses, brighter center accent, plus a soft full-page
+   blue wash on top so there's never a dark vacuum in the middle. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 1600px 1100px at 92% -5%,
+      oklch(0.45 0.22 263 / 0.65), transparent 65%),
+    radial-gradient(ellipse 1500px 1200px at -5% 105%,
+      oklch(0.34 0.18 263 / 0.62), transparent 65%),
+    radial-gradient(ellipse 1300px 900px at 50% 35%,
+      oklch(0.62 0.22 258 / 0.55), transparent 65%),
+    /* Soft full-page wash so no part of the viewport ever goes
+       darker than the deep navy base — matches the app's feel. */
+    linear-gradient(180deg,
+      oklch(0.18 0.07 263 / 0.55) 0%,
+      oklch(0.13 0.06 263 / 0.30) 100%);
+  will-change: transform;
+  transform: translateZ(0);
+}
 
 ::selection { background: var(--rec); color: #fff; }
-
-/* Links inherit by default */
 a { color: inherit; }
 
-/* ── Utility: monospace ──────────────────────────────── */
 .mono { font-family: var(--mono); font-feature-settings: "tnum", "zero"; }
 
-/* ── Utility: inline SVG icon baseline ───────────────── */
+/* ── Inline SVG icon baseline ──────────────────────────── */
 .i {
   display: inline-block;
   width: 18px; height: 18px;
@@ -80,10 +130,9 @@ a { color: inherit; }
 }
 
 /* ─────────────────────────────────────────────────────────
-   Buttons
+   Buttons — cinematic glow, glass surface
    ───────────────────────────────────────────────────────── */
 
-/* .btn ── secondary / ghost on dark */
 .btn {
   appearance: none;
   -webkit-appearance: none;
@@ -92,8 +141,8 @@ a { color: inherit; }
   gap: 8px; white-space: nowrap;
   cursor: pointer; user-select: none;
 
-  height: 36px; padding: 0 14px;
-  border-radius: 8px;
+  height: 38px; padding: 0 16px;
+  border-radius: 10px;
 
   font: inherit;
   font-size: 13px; font-weight: 500;
@@ -101,40 +150,42 @@ a { color: inherit; }
   color: var(--fg);
 
   background: var(--bg-card);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
   box-shadow:
     inset 0 0 0 0.5px var(--line),
-    inset 0 1px 0 oklch(1 0 0 / 0.04),
-    0 1px 0 rgba(0,0,0,0.15);
+    inset 0 1px 0 oklch(1 0 0 / 0.05),
+    0 1px 0 rgba(0,0,0,0.25);
 
   transition:
-    background 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.08s ease,
-    filter 0.15s ease;
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.1s ease,
+    filter 0.18s ease;
 }
 .btn:hover {
   background: var(--bg-elev);
   box-shadow:
-    inset 0 0 0 0.5px oklch(1 0 0 / 0.16),
-    inset 0 1px 0 oklch(1 0 0 / 0.05);
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 8px 24px -10px oklch(0.65 0.18 245 / 0.45);
 }
 .btn:active { transform: translateY(0.5px); }
 .btn:focus-visible {
   outline: 0;
   box-shadow:
     inset 0 0 0 0.5px oklch(1 0 0 / 0.16),
-    0 0 0 3px oklch(0.655 0.205 258 / 0.35);
+    0 0 0 3px var(--cyan-soft);
 }
 
-/* .btn-xl ── oversized variant (heights overridden inline in HTML too) */
 .btn-xl {
-  height: 52px; padding: 0 22px;
-  border-radius: 12px;
-  font-size: 14.5px;
+  height: 56px; padding: 0 26px;
+  border-radius: 14px;
+  font-size: 15px;
   font-weight: 600;
 }
 
-/* .btn-rec ── primary CTA / "Record". Default (idle) is blue; .live flips it red. */
+/* .btn-rec — primary CTA, electric blue with deep glow */
 .btn-rec {
   appearance: none;
   -webkit-appearance: none;
@@ -143,8 +194,8 @@ a { color: inherit; }
   gap: 10px; white-space: nowrap;
   cursor: pointer; user-select: none;
 
-  height: 36px; padding: 0 16px;
-  border-radius: 8px;
+  height: 38px; padding: 0 18px;
+  border-radius: 10px;
 
   font: inherit;
   font-size: 13px; font-weight: 600;
@@ -152,49 +203,58 @@ a { color: inherit; }
   color: #fff;
 
   background: linear-gradient(180deg,
-    oklch(0.720 0.200 258) 0%,
-    oklch(0.540 0.220 260) 100%);
+    oklch(0.72 0.20 250) 0%,
+    oklch(0.50 0.24 258) 100%);
 
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.28),
-    inset 0 0 0 0.5px oklch(0.450 0.200 260),
-    0 6px 18px -4px oklch(0.540 0.220 260 / 0.45),
-    0 1px 0 rgba(0,0,0,0.15);
+    inset 0 1px 0 oklch(1 0 0 / 0.32),
+    inset 0 0 0 0.5px oklch(0.45 0.22 258),
+    0 10px 32px -6px var(--rec-glow),
+    0 0 0 1px oklch(0.30 0.18 258 / 0.3),
+    0 1px 0 rgba(0,0,0,0.20);
 
   transition:
-    filter 0.15s ease,
-    transform 0.08s ease,
-    box-shadow 0.15s ease;
+    filter 0.18s ease,
+    transform 0.1s ease,
+    box-shadow 0.18s ease;
 }
-.btn-rec:hover  { filter: brightness(1.08) saturate(1.03); }
+.btn-rec:hover  {
+  filter: brightness(1.10) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.32),
+    inset 0 0 0 0.5px oklch(0.45 0.22 258),
+    0 14px 38px -6px var(--rec-glow),
+    0 0 0 1px oklch(0.30 0.18 258 / 0.35),
+    0 1px 0 rgba(0,0,0,0.20);
+}
 .btn-rec:active { transform: translateY(0.5px); }
 .btn-rec:focus-visible {
   outline: 0;
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.28),
-    inset 0 0 0 0.5px oklch(0.450 0.200 260),
-    0 0 0 3px oklch(0.655 0.205 258 / 0.45);
+    inset 0 1px 0 oklch(1 0 0 / 0.32),
+    inset 0 0 0 0.5px oklch(0.45 0.22 258),
+    0 0 0 3px oklch(0.65 0.20 258 / 0.45);
 }
 
-/* .btn-rec.live ── recording state, red */
 .btn-rec.live {
   background: linear-gradient(180deg,
-    oklch(0.720 0.220 25) 0%,
-    oklch(0.540 0.220 25) 100%);
+    oklch(0.78 0.18 245) 0%,
+    oklch(0.55 0.22 258) 100%);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.28),
-    inset 0 0 0 0.5px oklch(0.460 0.220 25),
-    0 6px 18px -4px oklch(0.540 0.220 25 / 0.50),
-    0 1px 0 rgba(0,0,0,0.15);
+    inset 0 1px 0 oklch(1 0 0 / 0.34),
+    inset 0 0 0 0.5px oklch(0.45 0.22 258),
+    0 12px 36px -4px var(--cyan-glow),
+    0 0 0 1px oklch(0.30 0.18 258 / 0.35),
+    0 1px 0 rgba(0,0,0,0.20);
 }
 .btn-rec.live:focus-visible {
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.28),
-    inset 0 0 0 0.5px oklch(0.460 0.220 25),
-    0 0 0 3px oklch(0.680 0.220 25 / 0.45);
+    inset 0 1px 0 oklch(1 0 0 / 0.34),
+    inset 0 0 0 0.5px oklch(0.45 0.22 258),
+    0 0 0 3px oklch(0.78 0.18 245 / 0.45);
 }
 
-/* Timer slug inside the stop/live button */
+/* Timer slug */
 .btn-rec .timer {
   font-family: var(--mono);
   font-weight: 600;
@@ -208,7 +268,7 @@ a { color: inherit; }
 }
 
 /* ─────────────────────────────────────────────────────────
-   Pulse indicator  (<span class="pulse"><span class="circ|sq"/></span>)
+   Pulse indicator
    ───────────────────────────────────────────────────────── */
 .pulse {
   position: relative;
@@ -234,7 +294,7 @@ a { color: inherit; }
 
 @keyframes pulseRing {
   0%   { box-shadow: 0 0 0 0   oklch(1 0 0 / 0.55); }
-  70%  { box-shadow: 0 0 0 8px oklch(1 0 0 / 0);    }
+  70%  { box-shadow: 0 0 0 10px oklch(1 0 0 / 0);   }
   100% { box-shadow: 0 0 0 0   oklch(1 0 0 / 0);    }
 }
 @keyframes pulseFlash {
@@ -242,9 +302,139 @@ a { color: inherit; }
   50%      { opacity: 0.55; transform: scale(0.92); }
 }
 
+/* ─────────────────────────────────────────────────────────
+   Signature orb — the centerpiece visual.
+   A glassy, multi-layered 3D sphere with cyan-blue gradients,
+   specular highlight, soft halo. Slow rotation for breath.
+
+   Markup:
+     <div class="orb">
+       <div class="orb-halo"></div>
+       <div class="orb-core">
+         <div class="orb-spec"></div>
+         <div class="orb-rim"></div>
+       </div>
+       <div class="orb-ring"></div>
+     </div>
+   ───────────────────────────────────────────────────────── */
+
+.orb {
+  position: relative;
+  width: 280px; height: 280px;
+  display: grid; place-items: center;
+  transform: translateZ(0);  /* enable subpixel filter rendering */
+}
+
+.orb-halo {
+  position: absolute; inset: -14%;
+  background:
+    radial-gradient(circle, var(--cyan-glow) 0%, transparent 55%);
+  /* No blur or animation — same look at a fraction of the GPU cost.
+     The radial gradient already feels soft. */
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.orb-core {
+  position: relative;
+  width: 76%; height: 76%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%,
+      oklch(1 0 0 / 0.92) 0%,
+      oklch(0.92 0.10 220) 8%,
+      oklch(0.72 0.18 240) 22%,
+      oklch(0.45 0.22 248) 48%,
+      oklch(0.18 0.16 258) 78%,
+      oklch(0.04 0.06 260) 100%);
+  box-shadow:
+    inset 0 0 60px oklch(0 0 0 / 0.55),
+    inset 0 -22px 36px oklch(0.05 0.10 260 / 0.6),
+    0 18px 60px -10px oklch(0.40 0.22 258 / 0.55),
+    0 0 0 0.5px oklch(0.78 0.18 245 / 0.18);
+  /* Static — no rotation. The off-center specular makes the orb
+     look 3D without a constant spin. */
+}
+
+.orb-spec {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 22%,
+      oklch(1 0 0 / 0.55) 0%,
+      transparent 25%),
+    radial-gradient(ellipse at 70% 88%,
+      oklch(0.78 0.18 245 / 0.45) 0%,
+      transparent 35%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.orb-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.22),
+    inset 0 0 24px oklch(0.78 0.18 245 / 0.18);
+  pointer-events: none;
+}
+
+.orb-ring {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  border: 1px solid oklch(0.78 0.18 245 / 0.30);
+  /* No box-shadow / no animation — was forcing a layer repaint
+     every frame. The static thin ring still gives the orb framing. */
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Glass card — a generic translucent surface for
+   hovering / floating elements (pricing, FAQ, etc.)
+   ───────────────────────────────────────────────────────── */
+
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 0 0 0.5px var(--line),
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 24px 48px -24px rgba(0,0,0,0.5);
+}
+
+.glass-glow {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 0 0 0.5px var(--line-glow),
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 30px 60px -30px var(--rec-glow);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Stat number — clinical dashboard typography
+   ───────────────────────────────────────────────────────── */
+
+.stat-num {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  text-shadow: 0 0 24px oklch(0.78 0.18 245 / 0.25);
+}
+
 /* Respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .pulse .circ,
   .pulse .sq,
+  .orb-core, .orb-ring, .orb-halo,
   * { animation: none !important; transition-duration: 0.01ms !important; }
 }
